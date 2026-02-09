@@ -1,0 +1,491 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Ethical Firebase & GCP Security Scanner - Detect misconfigurations and vulnerabilities in Firebase and Google Cloud Platform applications">
+    <title>Firebase & GCP Security Scanner | CyberSec Suite</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/firebase-gcp-styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+        <script src="../js/pdf-report.js"></script>
+    <script src="../js/scanner-utils.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+    <!-- Ambient HUD Decorations -->
+    <div class="hud-decoration hud-top-left"></div>
+    <div class="hud-decoration hud-bottom-right"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu">
+                <!-- Injected by scanner-nav.js -->
+            </div>
+            <div class="nav-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">Scanner:</span>
+                    <span class="stat-value" id="scanner-status">READY</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <section class="hero-section">
+            <div class="hero-badge">
+                <i data-lucide="flame"></i>
+                <span>Firebase & GCP Security</span>
+            </div>
+            <h1 class="hero-title">
+                <span class="glowing-text">Cloud</span> Security Scanner
+            </h1>
+            <p class="hero-subtitle">
+                Ethical, automated detection of Firebase and Google Cloud Platform misconfigurations.
+                Bug bounty safe • OWASP compliant • Zero exploitation
+            </p>
+        </section>
+
+        <!-- Scanner Statistics -->
+        <section class="container">
+            <div class="stats-overview">
+                <div class="stat-box">
+                    <div class="stat-number" id="total-modules">15</div>
+                    <div class="stat-label">Security Modules</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="total-checks">0</div>
+                    <div class="stat-label">Checks Performed</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="vulns-found">0</div>
+                    <div class="stat-label">Issues Found</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="scan-time">0s</div>
+                    <div class="stat-label">Scan Duration</div>
+                </div>
+            </div>
+
+            <!-- Configuration Section -->
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">Target Configuration</h2>
+                </div>
+
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="target-url">Target URL / Domain</label>
+                        <input type="url" id="target-url" class="input"
+                            placeholder="https://example.firebaseapp.com or domain with Firebase">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="firebase-config">Firebase Config (Optional - Auto-Detected)</label>
+                        <textarea id="firebase-config" class="input" rows="4"
+                            placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "..."}'>
+                        </textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gcp-endpoints">GCP Endpoints (comma-separated, optional)</label>
+                        <input type="text" id="gcp-endpoints" class="input"
+                            placeholder="https://region-project.cloudfunctions.net/function1, ...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="scan-mode">Scan Mode</label>
+                        <select id="scan-mode" class="input">
+                            <option value="passive">Passive (Discovery Only)</option>
+                            <option value="active" selected>Active (Safe Testing)</option>
+                            <option value="comprehensive">Comprehensive (Full Module Suite)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Firebase Module Selection -->
+                <div class="section-label">Firebase Security Modules</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="mod-firestore-read" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Firestore Unauthenticated Read</span>
+                            <span class="checkbox-desc">Detect if Firestore collections allow public read access</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="mod-firestore-write" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Firestore Unauthenticated Write</span>
+                            <span class="checkbox-desc">Test for write permissions without authentication</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="mod-rtdb-read" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Realtime DB Public Access</span>
+                            <span class="checkbox-desc">Check if Realtime Database allows public reads</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="mod-storage-public" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Storage Public Read</span>
+                            <span class="checkbox-desc">Detect publicly accessible Firebase Storage buckets</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="mod-storage-upload" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Storage Unrestricted Upload</span>
+                            <span class="checkbox-desc">Test for unrestricted file upload capabilities</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="mod-cloud-func" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Cloud Function Auth Bypass</span>
+                            <span class="checkbox-desc">Detect unauthenticated Cloud Function invocations</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="mod-anonymous-auth">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Anonymous Auth Misuse</span>
+                            <span class="checkbox-desc">Check for improper anonymous authentication handling</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="mod-uid-trust" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">UID Trust Abuse</span>
+                            <span class="checkbox-desc">Detect client-controlled UID vulnerabilities</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="mod-doc-path">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Document Path Manipulation</span>
+                            <span class="checkbox-desc">Test for client-controlled document path abuse</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GCP Module Selection -->
+                <div class="section-label">GCP Security Modules</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="mod-gcp-functions" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Public Cloud Functions</span>
+                            <span class="checkbox-desc">Identify unauthenticated GCP Cloud Functions</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="mod-gcp-storage" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">GCS Public Objects</span>
+                            <span class="checkbox-desc">Detect publicly accessible Cloud Storage buckets</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="mod-gcp-api" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Unauthenticated APIs</span>
+                            <span class="checkbox-desc">Discover exposed API endpoints without auth</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="mod-signed-url">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Signed URL Misuse</span>
+                            <span class="checkbox-desc">Check for overly permissive signed URLs</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="mod-ssrf-metadata">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">SSRF-to-Metadata</span>
+                            <span class="checkbox-desc">Detect SSRF sinks that could expose GCP metadata</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="mod-env-leak">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Environment Variable Leakage</span>
+                            <span class="checkbox-desc">Detect exposed environment variables and secrets</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 2rem;">
+                    <button class="btn btn-primary btn-lg" id="start-scan-btn">
+                        <i data-lucide="play"></i>
+                        Start Security Scan
+                    </button>
+                    <button class="btn btn-danger btn-lg" id="stop-scan-btn" style="display: none;">
+                        <i data-lucide="square"></i>
+                        Stop Scan
+                    </button>
+                    <button class="btn" id="discover-btn"
+                        style="background: rgba(16,185,129,0.1); color: var(--clr-success); border: 1px solid rgba(16,185,129,0.3);">
+                        <i data-lucide="search"></i>
+                        Discover Firebase Config
+                    </button>
+                </div>
+            </div>
+
+            <!-- Attack Visualization -->
+            <div class="attack-viz" id="attack-section" style="display: none;">
+                <div class="card-header" style="border-color: var(--clr-warning);">
+                    <h2 class="card-title">Live Scan Analysis</h2>
+                </div>
+
+                <!-- Progress -->
+                <div class="progress-container">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span id="progress-text" style="font-family: var(--font-mono);">Initializing...</span>
+                        <span id="progress-percent" style="color: var(--clr-primary); font-weight: 700;">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <!-- Current Test Display -->
+                <div class="current-attack">
+                    <div class="attack-grid">
+                        <div class="attack-info-box">
+                            <div class="attack-label">Current Module</div>
+                            <div class="attack-value" id="current-module">-</div>
+                        </div>
+                        <div class="attack-info-box">
+                            <div class="attack-label">Test Type</div>
+                            <div class="attack-value" id="current-test-type">-</div>
+                        </div>
+                        <div class="attack-info-box">
+                            <div class="attack-label">Target</div>
+                            <div class="attack-value" id="current-target">-</div>
+                        </div>
+                        <div class="attack-info-box">
+                            <div class="attack-label">Status</div>
+                            <div class="attack-value" id="test-status">
+                                <span class="status-indicator waiting">Waiting</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Summary -->
+                <div class="results-summary">
+                    <div class="summary-card success">
+                        <div class="summary-icon"><i data-lucide="check-circle"></i></div>
+                        <div class="summary-value" id="passed-count">0</div>
+                        <div class="summary-label">Passed</div>
+                    </div>
+                    <div class="summary-card warning">
+                        <div class="summary-icon"><i data-lucide="alert-triangle"></i></div>
+                        <div class="summary-value" id="warning-count">0</div>
+                        <div class="summary-label">Warnings</div>
+                    </div>
+                    <div class="summary-card danger">
+                        <div class="summary-icon"><i data-lucide="shield-alert"></i></div>
+                        <div class="summary-value" id="vuln-count">0</div>
+                        <div class="summary-label">Vulnerabilities</div>
+                    </div>
+                    <div class="summary-card info">
+                        <div class="summary-icon"><i data-lucide="info"></i></div>
+                        <div class="summary-value" id="info-count">0</div>
+                        <div class="summary-label">Info</div>
+                    </div>
+                </div>
+
+                <!-- Live Log -->
+                <div class="live-log">
+                    <div class="log-header">
+                        <span style="font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;">
+                            <span class="status-dot scanning"></span>
+                            Security Scan Log
+                        </span>
+                        <button class="log-btn" id="clear-log-btn">Clear</button>
+                    </div>
+                    <div class="log-content" id="attack-log">
+                        <div class="log-entry info">[System] Firebase & GCP Security Scanner ready</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Discovered Firebase Config -->
+            <div class="config-card" id="discovered-config-section" style="display: none;">
+                <div class="card-header" style="border-color: var(--clr-success);">
+                    <h2 class="card-title">Discovered Firebase Configuration</h2>
+                </div>
+                <div class="discovery-results">
+                    <div class="discovery-item">
+                        <span class="discovery-label">API Key:</span>
+                        <code class="discovery-value" id="discovered-api-key">-</code>
+                    </div>
+                    <div class="discovery-item">
+                        <span class="discovery-label">Auth Domain:</span>
+                        <code class="discovery-value" id="discovered-auth-domain">-</code>
+                    </div>
+                    <div class="discovery-item">
+                        <span class="discovery-label">Project ID:</span>
+                        <code class="discovery-value" id="discovered-project-id">-</code>
+                    </div>
+                    <div class="discovery-item">
+                        <span class="discovery-label">Storage Bucket:</span>
+                        <code class="discovery-value" id="discovered-storage-bucket">-</code>
+                    </div>
+                    <div class="discovery-item">
+                        <span class="discovery-label">Database URL:</span>
+                        <code class="discovery-value" id="discovered-database-url">-</code>
+                    </div>
+                    <div class="discovery-item">
+                        <span class="discovery-label">Messaging Sender ID:</span>
+                        <code class="discovery-value" id="discovered-messaging-id">-</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="results-section" style="display: none;">
+                <div class="card-header" style="border-color: var(--clr-danger);">
+                    <h2 class="card-title">Security Findings</h2>
+                </div>
+
+                <!-- Filter Tabs -->
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="all">All</button>
+                    <button class="filter-tab" data-filter="critical">Critical</button>
+                    <button class="filter-tab" data-filter="high">High</button>
+                    <button class="filter-tab" data-filter="medium">Medium</button>
+                    <button class="filter-tab" data-filter="low">Low</button>
+                    <button class="filter-tab" data-filter="info">Info</button>
+                </div>
+
+                <div id="vulnerability-list"></div>
+
+                <!-- Export Options -->
+                <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
+                    <button class="btn btn-primary" id="export-json-btn">
+                        <i data-lucide="file-json"></i>
+                        Export JSON
+                    </button>
+                    <button class="btn btn-primary" id="export-pdf-btn">
+                        <i data-lucide="file-text"></i>
+                        Export PDF Report
+                    </button>
+                    <button class="btn" id="export-bugbounty-btn"
+                        style="background: rgba(245,158,11,0.1); color: var(--clr-warning); border: 1px solid rgba(245,158,11,0.3);">
+                        <i data-lucide="trophy"></i>
+                        Bug Bounty Template
+                    </button>
+                </div>
+            </div>
+
+            <!-- Educational Section -->
+            <div class="config-card">
+                <div class="card-header" style="border-color: var(--clr-secondary);">
+                    <h2 class="card-title">About This Scanner</h2>
+                </div>
+
+                <div class="technique-grid">
+                    <div class="technique-item">
+                        <h4>🔒 Legal & Ethical</h4>
+                        <p>This scanner only detects vulnerabilities through safe, observable methods. No exploitation,
+                            no brute-force, no unauthorized access. Designed for bug bounty and authorized penetration
+                            testing.</p>
+                    </div>
+                    <div class="technique-item">
+                        <h4>🔥 Firebase Coverage</h4>
+                        <p>Detects misconfigurations in Firestore, Realtime Database, Storage, Cloud Functions, and
+                            Authentication. Identifies common security rules mistakes.</p>
+                    </div>
+                    <div class="technique-item">
+                        <h4>☁️ GCP Coverage</h4>
+                        <p>Checks Cloud Functions, Cloud Storage, APIs, and potential SSRF sinks. Identifies publicly
+                            exposed resources and authentication bypasses.</p>
+                    </div>
+                    <div class="technique-item">
+                        <h4>📊 Confidence Levels</h4>
+                        <p><strong>High:</strong> Confirmed vulnerability with evidence<br>
+                            <strong>Medium:</strong> Likely vulnerable, needs verification<br>
+                            <strong>Low:</strong> Possible issue, may be intended
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | Firebase & GCP Security Scanner v1.0.0</p>
+        <p style="margin-top: 10px; opacity: 0.5;">For authorized security testing only. Not for malicious use.</p>
+    </footer>
+
+    <script src="../js/scanner-nav.js"></script>
+    <script src="../js/firebase-gcp-payloads.js"></script>
+    <script src="../js/firebase-gcp-scanner.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+
+    <style>
+        .hud-decoration {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(150px);
+            z-index: -1;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .hud-top-left {
+            top: -100px;
+            left: -100px;
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+        }
+
+        .hud-bottom-right {
+            bottom: -100px;
+            right: -100px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            color: var(--clr-warning);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-badge i {
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+</body>
+
+</html>

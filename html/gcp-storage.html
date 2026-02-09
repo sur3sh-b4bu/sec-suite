@@ -1,0 +1,235 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCP Cloud Storage Scanner | CyberSec Suite</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/firebase-gcp-styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div class="hud-decoration hud-top-left" style="background: linear-gradient(135deg, #10b981, #06b6d4);"></div>
+    <div class="hud-decoration hud-bottom-right"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu"></div>
+            <div class="nav-stats">
+                <div class="stat-badge"><span class="stat-label">Scanner:</span><span class="stat-value"
+                        id="scanner-status">READY</span></div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <section class="hero-section">
+            <div class="hero-badge"
+                style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: #10b981;">
+                <i data-lucide="database"></i>
+                <span>GCP Cloud Storage</span>
+            </div>
+            <h1 class="hero-title"><span class="glowing-text">Cloud Storage</span> Scanner</h1>
+            <p class="hero-subtitle">Detect public buckets, exposed objects, misconfiguired ACLs, and signed URL
+                vulnerabilities in Google Cloud Storage.</p>
+        </section>
+
+        <section class="container">
+            <div class="stats-overview">
+                <div class="stat-box">
+                    <div class="stat-number" id="total-modules">11</div>
+                    <div class="stat-label">Attack Vectors</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="total-checks">0</div>
+                    <div class="stat-label">Tests Run</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="vulns-found">0</div>
+                    <div class="stat-label">Exposed</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="scan-time">0s</div>
+                    <div class="stat-label">Duration</div>
+                </div>
+            </div>
+
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">GCS Bucket Target</h2>
+                </div>
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="bucket-name">Bucket Name</label>
+                        <input type="text" id="bucket-name" class="input" placeholder="my-company-bucket">
+                    </div>
+                    <div class="form-group">
+                        <label for="bucket-url">Or Full Bucket URL</label>
+                        <input type="url" id="bucket-url" class="input"
+                            placeholder="https://storage.googleapis.com/bucket-name">
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label for="object-paths">Known Object Paths (optional, one per line)</label>
+                        <textarea id="object-paths" class="input" rows="3" placeholder="backup/
+config/
+exports/database.sql"></textarea>
+                    </div>
+                </div>
+
+                <div class="section-label">GCS Attack Vectors</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-public-bucket" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Public Bucket Access</span>
+                            <span class="checkbox-desc">Check for allUsers read/write permissions</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-bucket-listing" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Bucket Object Listing</span>
+                            <span class="checkbox-desc">Test if bucket contents can be enumerated</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-acl-exposed" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">ACL Exposure</span>
+                            <span class="checkbox-desc">Check if ACLs are publicly readable</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-signed-url" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Signed URL Analysis</span>
+                            <span class="checkbox-desc">Detect overly long-lived signed URLs</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-uniform-bucket" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Uniform Bucket Check</span>
+                            <span class="checkbox-desc">Verify uniform bucket-level access</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-versioning" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Version Access</span>
+                            <span class="checkbox-desc">Check for exposed old object versions</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-lifecycle" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Lifecycle Policy</span>
+                            <span class="checkbox-desc">Detect missing data retention policies</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-cors-gcs" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">CORS Configuration</span>
+                            <span class="checkbox-desc">Test for wildcard CORS origins</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-encryption">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Encryption Status</span>
+                            <span class="checkbox-desc">Check for customer-managed encryption</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-sensitive-files" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Sensitive File Detection</span>
+                            <span class="checkbox-desc">Scan for exposed credentials/backups</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-upload-perm">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Public Upload</span>
+                            <span class="checkbox-desc">Test for public write access</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button class="btn btn-primary btn-lg" id="start-scan-btn"><i data-lucide="play"></i>Start GCS
+                        Scan</button>
+                    <button class="btn btn-danger btn-lg" id="stop-scan-btn" style="display:none;"><i
+                            data-lucide="square"></i>Stop</button>
+                </div>
+            </div>
+
+            <div class="attack-viz" id="attack-section" style="display:none;">
+                <div class="card-header" style="border-color:#10b981;">
+                    <h2 class="card-title">Live GCS Analysis</h2>
+                </div>
+                <div class="progress-container">
+                    <div style="display:flex;justify-content:space-between;"><span
+                            id="progress-text">Initializing...</span><span id="progress-percent">0%</span></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+                <div class="results-summary">
+                    <div class="summary-card success">
+                        <div class="summary-icon"><i data-lucide="check-circle"></i></div>
+                        <div class="summary-value" id="passed-count">0</div>
+                        <div class="summary-label">Secure</div>
+                    </div>
+                    <div class="summary-card warning">
+                        <div class="summary-icon"><i data-lucide="alert-triangle"></i></div>
+                        <div class="summary-value" id="warning-count">0</div>
+                        <div class="summary-label">Warnings</div>
+                    </div>
+                    <div class="summary-card danger">
+                        <div class="summary-icon"><i data-lucide="shield-alert"></i></div>
+                        <div class="summary-value" id="vuln-count">0</div>
+                        <div class="summary-label">Critical</div>
+                    </div>
+                    <div class="summary-card info">
+                        <div class="summary-icon"><i data-lucide="info"></i></div>
+                        <div class="summary-value" id="info-count">0</div>
+                        <div class="summary-label">Info</div>
+                    </div>
+                </div>
+                <div class="live-log">
+                    <div class="log-header"><span><span class="status-dot scanning"></span>GCS Security
+                            Log</span><button class="log-btn" id="clear-log-btn">Clear</button></div>
+                    <div class="log-content" id="attack-log">
+                        <div class="log-entry info">[System] GCP Cloud Storage Scanner ready</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section" id="results-section" style="display:none;">
+                <div class="card-header" style="border-color:#10b981;">
+                    <h2 class="card-title">GCS Vulnerabilities</h2>
+                </div>
+                <div id="vulnerability-list"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | GCP Cloud Storage Scanner v1.0</p>
+    </footer>
+    <script src="../js/scanner-nav.js"></script>
+    <script src="../js/gcp-storage-scanner.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

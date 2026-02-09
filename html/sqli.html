@@ -1,0 +1,285 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec Suite | SQL Injection Discovery</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu">
+                <!-- Injected by scanner-nav.js -->
+            </div>
+            <div class="nav-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">Vector-Tests:</span>
+                    <span class="stat-value" id="total-payloads">300+</span>
+                </div>
+                <div class="stat-badge">
+                    <span class="stat-label">Discovered:</span>
+                    <span class="stat-value" id="vuln-badge">0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <h1 class="hero-title">
+            <span class="glowing-text">SQLi</span> Discovery HUD
+        </h1>
+        <p class="hero-subtitle">
+            Advanced database-state auditor. Automated detection of Error-based, Boolean-based, and Time-blind SQL
+            injection vulnerabilities.
+        </p>
+    </section>
+
+    <main class="main-content">
+        <section class="container">
+
+            <!-- 1. SQLi Configuration Matrix -->
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">► Attack Configuration</h2>
+                </div>
+
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="target-url">Target Endpoint URL</label>
+                        <input type="url" id="target-url" class="input"
+                            placeholder="https://api.system.com/products?category=Gifts">
+                    </div>
+                    <div class="form-group">
+                        <label for="http-method">Request Protocol</label>
+                        <select id="http-method" class="input">
+                            <option value="GET">GET METHOD</option>
+                            <option value="POST">POST METHOD</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top:2rem;">
+                    <label for="vuln-param">Identity Node (Parameter Name)</label>
+                    <input type="text" id="vuln-param" class="input" placeholder="id / category / user / filter"
+                        value="category">
+                </div>
+
+                <div class="section-label">Attack Profile Matrix</div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-error" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Error-Based</span>
+                            <span class="checkbox-desc">Audit for database schema leaks via verbose errors.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-boolean" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Boolean-Based</span>
+                            <span class="checkbox-desc">Test for inference via differential response states.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-time" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Time-Blind</span>
+                            <span class="checkbox-desc">Audit for execution via sub-second delay variance.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-union" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">UNION-Based</span>
+                            <span class="checkbox-desc">Retrieve cross-table data using UNION SELECT.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-out-of-band" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Out-of-Band</span>
+                            <span class="checkbox-desc">Exfiltrate data via DNS/HTTP interaction nodes.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-db-specific" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">DB-Specific</span>
+                            <span class="checkbox-desc">Tailor probes for MySQL, PostgreSQL, Oracle, MSSQL.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="section-label">OOB Auditor URL (Blind SQLi)</div>
+                <div class="form-group">
+                    <input type="text" id="collaborator-url" class="input" placeholder="audit.webhook.site/unique-id">
+                    <small class="input-hint">Threshold for blind execution verification via external DNS/HTTP
+                        interaction.</small>
+                </div>
+
+                <div class="scan-controls">
+                    <button id="start-scan-btn" class="btn btn-primary btn-lg">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" style="margin-right:10px;">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                        Initialize SQLi Audit
+                    </button>
+                    <button id="stop-scan-btn" class="btn btn-danger" style="display:none;">Terminate Sequence</button>
+                </div>
+            </div>
+
+            <!-- 2. Execution HUD -->
+            <div id="attack-section" class="attack-viz" style="display:none;">
+                <div class="viz-header">
+                    <h3 class="viz-title">⚡ REAL-TIME SQLi HUD</h3>
+                    <div class="viz-status">
+                        <span class="status-dot scanning"></span>
+                        <span id="scan-status" style="color:var(--clr-success);">ACTIVE_AUDIT</span>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-info"
+                        style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.85rem;color:var(--clr-accent);">
+                        <span id="progress-text">READY</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-stats"
+                        style="display:grid;grid-template-columns:repeat(3, 1fr);text-align:center;">
+                        <div class="stat-item">
+                            <div class="stat-label">Vector Probes</div>
+                            <div class="stat-number" id="tested-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Exploited</div>
+                            <div class="stat-number" id="vuln-count" style="color:var(--clr-success);">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Differential Hits</div>
+                            <div class="stat-number" id="diff-count" style="color:var(--clr-accent);">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="current-payload">
+                    <div class="payload-header">
+                        <span class="payload-label"
+                            style="text-transform:uppercase;font-size:0.75rem;font-weight:800;letter-spacing:0.1em;color:var(--clr-accent);">Active
+                            Vector Probe</span>
+                        <span class="payload-type-badge" id="current-type"
+                            style="background:var(--clr-primary);">STANDBY</span>
+                    </div>
+                    <pre id="current-payload-code"
+                        style="font-size:0.85rem; padding:1.5rem; white-space:pre-wrap;"></pre>
+                </div>
+
+                <div class="live-log">
+                    <div class="log-header">
+                        <span class="log-title">TRANSACTION LOG</span>
+                        <button id="clear-log-btn" class="btn btn-ghost btn-sm">Purge</button>
+                    </div>
+                    <div class="log-content" id="attack-log"></div>
+                </div>
+            </div>
+
+            <!-- 3. Intelligence Evidence -->
+            <div id="results-section" class="results-section" style="display:none;">
+                <div class="results-header"
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3rem;">
+                    <h3 class="results-title">► DISCOVERED VECTORS</h3>
+                    <div style="display:flex;gap:1.5rem;">
+                        <button id="generate-exploit-btn" class="btn btn-primary" style="padding:1rem 2rem;">GENERATE
+                            POC COMMAND</button>
+                        <button id="export-pdf-btn" class="btn btn-success" style="padding:1rem 2rem;">EXPORT
+                            INTEL</button>
+                    </div>
+                </div>
+                <div id="vulnerability-list" class="vulnerability-list"></div>
+            </div>
+
+            <!-- 4. Exploit Generator -->
+            <div id="exploit-section" class="poc-section" style="display:none;">
+                <div class="card-header">
+                    <h3 class="card-title">🔨 SQLi EXPLOIT GENERATOR</h3>
+                </div>
+                <div class="poc-content">
+                    <div class="poc-tabs" style="display:flex;gap:1rem;margin-bottom:2rem;">
+                        <button class="btn btn-ghost active" data-tab="error"
+                            style="padding:0.75rem 1.5rem;">ERROR-BASED</button>
+                        <button class="btn btn-ghost" data-tab="union"
+                            style="padding:0.75rem 1.5rem;">UNION-BASED</button>
+                        <button class="btn btn-ghost" data-tab="time"
+                            style="padding:0.75rem 1.5rem;">TIME-BLIND</button>
+                    </div>
+                    <div class="poc-code-container"
+                        style="background:#000;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;">
+                        <div class="poc-code-header"
+                            style="background:rgba(255,255,255,0.05);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:0.8rem;text-transform:uppercase;color:var(--clr-accent);">Autonomous
+                                Exploit Payload</span>
+                            <button id="copy-exploit-btn" class="btn btn-primary btn-sm">COPY CODE</button>
+                        </div>
+                        <pre id="exploit-code" class="poc-code"
+                            style="padding:2.5rem;color:var(--clr-success);font-family:var(--font-mono);font-size:0.9rem;white-space:pre-wrap;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Research Matrix -->
+            <div class="section-label">SQLi Research Index</div>
+            <div class="technique-grid">
+                <div class="technique-item">
+                    <h4>🔴 Error-Based Leakage</h4>
+                    <p>Triggering specific database errors (e.g., via <code>1/0</code> or type conversion) that contain
+                        data from the database within the error message itself.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🔴 SQL UNION Selection</h4>
+                    <p>Appending a <code>UNION SELECT</code> statement to the original query to retrieve data from other
+                        tables in the database within the original output stream.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Time-Blind Inference</h4>
+                    <p>Submitting queries that use <code>pg_sleep(5)</code> or <code>WAITFOR DELAY '0:0:5'</code> to
+                        infer information based on how long the server takes to respond.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Out-of-Band Exfiltration</h4>
+                    <p>Using database features to make network requests (e.g., DNS lookups) containing data as part of
+                        the hostname, to bypass traditional response-based filtering.</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | Educational SQLi Module</p>
+    </footer>
+
+    <script type="module" src="../js/firebase-config.js"></script>
+    <script src="../js/sqli-payloads.js"></script>
+    <script src="../js/sqli-scanner.js"></script>
+    <script src="../js/scanner-nav.js"></script>
+        <script src="../js/pdf-report.js"></script>
+    <script src="../js/scanner-utils.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

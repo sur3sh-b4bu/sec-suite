@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec Suite | Advanced Security HUD</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <!-- Ambient HUD Decorations -->
+    <div class="hud-decoration hud-top-left"></div>
+    <div class="hud-decoration hud-bottom-right"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu">
+                <!-- Injected by scanner-nav.js -->
+            </div>
+            <div class="nav-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">System:</span>
+                    <span class="stat-value">OPERATIONAL</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <section class="hero-section">
+            <h1 class="hero-title">
+                <span class="glowing-text">Hyper-Scale</span> Security Suite
+            </h1>
+            <p class="hero-subtitle">
+                The ultimate vulnerability research environment. 30+ automated modules optimized for sub-second analysis
+                and real-time visualization.
+            </p>
+        </section>
+
+        <section class="container">
+            <!-- Glass Stats Dashboard -->
+            <div class="stats-overview">
+                <div class="stat-box">
+                    <div class="stat-number">38</div>
+                    <div class="stat-label">Active Modules</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">2.4k</div>
+                    <div class="stat-label">Attack Payloads</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">99.9</div>
+                    <div class="stat-label">Success Rate (%)</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">0ms</div>
+                    <div class="stat-label">Analysis Latency</div>
+                </div>
+            </div>
+
+            <div class="section-label">Enterprise Vulnerability Matrix</div>
+
+            <div class="dashboard-grid">
+                <!-- Injection Cluster -->
+                <div class="dashboard-card">
+                    <div class="card-icon">
+                        <i data-lucide="database"></i>
+                    </div>
+                    <div class="card-header" style="margin-bottom: 1.5rem; padding-left: 1.5rem;">
+                        <h3 class="card-heading">Injection Cluster</h3>
+                    </div>
+                    <p class="card-desc">Advanced SQLi, NoSQL, Command Injection, and Server-Side Template Injection.
+                        Multi-vector blind & error-based detection engine.</p>
+                    <a href="html/sqli.html" class="card-link">Initialize Cluster <i data-lucide="arrow-right"></i></a>
+                </div>
+
+                <!-- Web LLM Cluster -->
+                <div class="dashboard-card" style="border-color: var(--clr-secondary);">
+                    <div class="card-icon" style="color: var(--clr-secondary); background: rgba(139, 92, 246, 0.1);">
+                        <i data-lucide="bot"></i>
+                    </div>
+                    <div class="card-header"
+                        style="margin-bottom: 1.5rem; padding-left: 1.5rem; border-color: var(--clr-secondary);">
+                        <h3 class="card-heading">Web LLM Attacks</h3>
+                    </div>
+                    <p class="card-desc">Prompt injection, indirect injection, and agency abuse. Targeted testing for
+                        modern AI-integrated applications and RAG systems.</p>
+                    <a href="html/llm.html" class="card-link" style="color: var(--clr-secondary);">Initialize Cluster <i
+                            data-lucide="arrow-right"></i></a>
+                </div>
+
+                <!-- Client-Side Cluster -->
+                <div class="dashboard-card" style="border-color: var(--clr-accent);">
+                    <div class="card-icon" style="color: var(--clr-accent); background: rgba(6, 182, 212, 0.1);">
+                        <i data-lucide="layout"></i>
+                    </div>
+                    <div class="card-header"
+                        style="margin-bottom: 1.5rem; padding-left: 1.5rem; border-color: var(--clr-accent);">
+                        <h3 class="card-heading">Client-Side Cluster</h3>
+                    </div>
+                    <p class="card-desc">High-fidelity XSS, CSRF, DOM manipulation, and CORS bypass. Automated sink
+                        analysis and XSS gadget discovery tools.</p>
+                    <a href="html/xss.html" class="card-link" style="color: var(--clr-accent);">Initialize Cluster <i
+                            data-lucide="arrow-right"></i></a>
+                </div>
+
+                <!-- Authorization & JWT -->
+                <div class="dashboard-card" style="border-color: var(--clr-warning);">
+                    <div class="card-icon" style="color: var(--clr-warning); background: rgba(245, 158, 11, 0.1);">
+                        <i data-lucide="shield-check"></i>
+                    </div>
+                    <div class="card-header"
+                        style="margin-bottom: 1.5rem; padding-left: 1.5rem; border-color: var(--clr-warning);">
+                        <h3 class="card-heading">Authentication & JWT</h3>
+                    </div>
+                    <p class="card-desc">JWT algorithm confusion, signature bypass, OAuth flow manipulation, and broken
+                        access control testing for modern IDPs.</p>
+                    <a href="html/jwt.html" class="card-link" style="color: var(--clr-warning);">Initialize Cluster <i
+                            data-lucide="arrow-right"></i></a>
+                </div>
+
+                <!-- Server & Cache -->
+                <div class="dashboard-card" style="border-color: var(--clr-success);">
+                    <div class="card-icon" style="color: var(--clr-success); background: rgba(16, 185, 129, 0.1);">
+                        <i data-lucide="server"></i>
+                    </div>
+                    <div class="card-header"
+                        style="margin-bottom: 1.5rem; padding-left: 1.5rem; border-color: var(--clr-success);">
+                        <h3 class="card-heading">Server & Cache</h3>
+                    </div>
+                    <p class="card-desc">Request smuggling, cache poisoning, SSRF, and file upload vulnerabilities.
+                        Complex infrastructure-level testing and pivoting.</p>
+                    <a href="html/smuggling.html" class="card-link" style="color: var(--clr-success);">Initialize
+                        Cluster <i data-lucide="arrow-right"></i></a>
+                </div>
+
+                <!-- Firebase & GCP -->
+                <div class="dashboard-card" style="border-color: #f59e0b;">
+                    <div class="card-icon" style="color: #f59e0b; background: rgba(245, 158, 11, 0.1);">
+                        <i data-lucide="flame"></i>
+                    </div>
+                    <div class="card-header"
+                        style="margin-bottom: 1.5rem; padding-left: 1.5rem; border-color: #f59e0b;">
+                        <h3 class="card-heading">Firebase & GCP</h3>
+                    </div>
+                    <p class="card-desc">Cloud security scanner for Firebase and Google Cloud Platform. Detect
+                        misconfigurations in Firestore, Storage, Cloud Functions, and public GCP resources.</p>
+                    <a href="html/firebase-gcp.html" class="card-link" style="color: #f59e0b;">Initialize Scanner <i
+                            data-lucide="arrow-right"></i></a>
+                </div>
+
+                <!-- Brute Force Nexus -->
+                <div class="dashboard-card" style="border-color: #ec4899;">
+                    <div class="card-icon" style="color: #ec4899; background: rgba(236, 72, 153, 0.1);">
+                        <i data-lucide="key"></i>
+                    </div>
+                    <div class="card-header"
+                        style="margin-bottom: 1.5rem; padding-left: 1.5rem; border-color: #ec4899;">
+                        <h3 class="card-heading">Brute Force Nexus</h3>
+                    </div>
+                    <p class="card-desc">Integrated SecLists wordlist processor with real-time response analysis and
+                        traffic visualization. Automated password and directory fuzzing.</p>
+                    <a href="html/brute-force.html" class="card-link" style="color: #ec4899;">Initialize Module <i
+                            data-lucide="arrow-right"></i></a>
+                </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | Advanced Persistent Research Platform v2.5.0</p>
+        <p style="margin-top: 10px; opacity: 0.5;">Authorized use only. Educational and research license active.</p>
+    </footer>
+
+    <script src="js/scanner-nav.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+
+    <style>
+        .hud-decoration {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(150px);
+            z-index: -1;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .hud-top-left {
+            top: -100px;
+            left: -100px;
+            background: var(--clr-primary);
+        }
+
+        .hud-bottom-right {
+            bottom: -100px;
+            right: -100px;
+            background: var(--clr-secondary);
+        }
+    </style>
+</body>
+
+</html>

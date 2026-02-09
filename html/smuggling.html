@@ -1,0 +1,305 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec Suite | HTTP Request Smuggling Auditor</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu">
+                <!-- Injected by scanner-nav.js -->
+            </div>
+            <div class="nav-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">Vector-Tests:</span>
+                    <span class="stat-value" id="total-techniques">60+</span>
+                </div>
+                <div class="stat-badge">
+                    <span class="stat-label">Discovered:</span>
+                    <span class="stat-value" id="vuln-badge">0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <h1 class="hero-title">
+            <span class="glowing-text">Smuggling</span> HUD Discovery
+        </h1>
+        <p class="hero-subtitle">
+            Advanced protocol-state auditor. Automated detection of CL.TE, TE.CL, TE.TE desync, and HTTP/2 downgrade
+            vulnerabilities (H2.CL / H2.TE).
+        </p>
+    </section>
+
+    <main class="main-content">
+        <section class="container">
+
+            <!-- 1. Smuggling Configuration Matrix -->
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">► Protocol Environment</h2>
+                </div>
+
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="target-url">Target Host URL</label>
+                        <input type="url" id="target-url" class="input"
+                            placeholder="https://vulnerable-gateway.system.com/">
+                    </div>
+                    <div class="form-group">
+                        <label for="http-version">Front-End Protocol</label>
+                        <select id="http-version" class="input">
+                            <option value="HTTP/1.1">HTTP/1.1 (Legacy Standard)</option>
+                            <option value="HTTP/2">HTTP/2 (Multiplexed Streams)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="section-label">Attack Profile Matrix</div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="technique-cl-te" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">CL.TE Desync</span>
+                            <span class="checkbox-desc">Front-end: Content-Length | Back-end: Transfer-Encoding.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="technique-te-cl" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">TE.CL Desync</span>
+                            <span class="checkbox-desc">Front-end: Transfer-Encoding | Back-end: Content-Length.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="technique-te-te" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">TE.TE Obfuscation</span>
+                            <span class="checkbox-desc">Test double Transfer-Encoding with obfuscated headers.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="technique-http2-downgrade" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">H2 Downgrade</span>
+                            <span class="checkbox-desc">Test for H2.CL and H2.TE desync during protocol
+                                translation.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="technique-client-side" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Client-Side Desync</span>
+                            <span class="checkbox-desc">Audit for desync via Connection: Keep-Alive manipulation.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="technique-pause-based" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Timing Analysis</span>
+                            <span class="checkbox-desc">Verify desync via sub-second response timingvariance.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="section-label">Payload Objective Matrix</div>
+                <div class="checkbox-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <label class="checkbox-card" style="padding:1rem;">
+                        <input type="checkbox" id="obj-bypass-security" checked>
+                        <div class="checkbox-content"><span class="checkbox-title" style="font-size:0.8rem;">WAF
+                                Bypass</span></div>
+                    </label>
+                    <label class="checkbox-card" style="padding:1rem;">
+                        <input type="checkbox" id="obj-poison-cache" checked>
+                        <div class="checkbox-content"><span class="checkbox-title" style="font-size:0.8rem;">Cache
+                                Poison</span></div>
+                    </label>
+                    <label class="checkbox-card" style="padding:1rem;">
+                        <input type="checkbox" id="obj-hijack-requests" checked>
+                        <div class="checkbox-content"><span class="checkbox-title" style="font-size:0.8rem;">Req
+                                Hijack</span></div>
+                    </label>
+                    <label class="checkbox-card" style="padding:1rem;">
+                        <input type="checkbox" id="obj-xss-delivery" checked>
+                        <div class="checkbox-content"><span class="checkbox-title" style="font-size:0.8rem;">XSS
+                                Inject</span></div>
+                    </label>
+                </div>
+
+                <div class="form-group" style="margin-top:2rem;">
+                    <label for="timing-delay">Desync Verification Delay (ms)</label>
+                    <input type="number" id="timing-delay" class="input" value="5000">
+                    <small class="input-hint">Threshold for timing-based desync verification (Default: 5s).</small>
+                </div>
+
+                <div class="scan-controls">
+                    <button id="start-scan-btn" class="btn btn-primary btn-lg">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" style="margin-right:10px;">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                        Initialize Protocol Audit
+                    </button>
+                    <button id="stop-scan-btn" class="btn btn-danger" style="display:none;">Terminate Sequence</button>
+                </div>
+            </div>
+
+            <!-- 2. Execution HUD -->
+            <div id="attack-section" class="attack-viz" style="display:none;">
+                <div class="viz-header">
+                    <h3 class="viz-title">⚡ REAL-TIME SMUGGLING HUD</h3>
+                    <div class="viz-status">
+                        <span class="status-dot scanning"></span>
+                        <span id="scan-status" style="color:var(--clr-success);">ACTIVE_AUDIT</span>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-info"
+                        style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.85rem;color:var(--clr-accent);">
+                        <span id="progress-text">READY</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-stats"
+                        style="display:grid;grid-template-columns:repeat(3, 1fr);text-align:center;">
+                        <div class="stat-item">
+                            <div class="stat-label">Desync Probes</div>
+                            <div class="stat-number" id="tested-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Exploited</div>
+                            <div class="stat-number" id="vuln-count" style="color:var(--clr-success);">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Verified Safe</div>
+                            <div class="stat-number" id="safe-count" style="color:var(--clr-accent);">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="current-payload">
+                    <div class="payload-header">
+                        <span class="payload-label"
+                            style="text-transform:uppercase;font-size:0.75rem;font-weight:800;letter-spacing:0.1em;color:var(--clr-accent);">Active
+                            Protocol Stream</span>
+                        <span class="payload-type-badge" id="current-type"
+                            style="background:var(--clr-primary);">STANDBY</span>
+                    </div>
+                    <pre id="current-payload-request"
+                        style="font-size:0.85rem; padding:1.5rem; white-space:pre-wrap;"></pre>
+                </div>
+
+                <div class="live-log">
+                    <div class="log-header">
+                        <span class="log-title">PROTOCOL TRANSACTION LOG</span>
+                        <button id="clear-log-btn" class="btn btn-ghost btn-sm">Purge</button>
+                    </div>
+                    <div class="log-content" id="attack-log"></div>
+                </div>
+            </div>
+
+            <!-- 3. Intelligence Evidence -->
+            <div id="results-section" class="results-section" style="display:none;">
+                <div class="results-header"
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3rem;">
+                    <h3 class="results-title">► DISCOVERED VECTORS</h3>
+                    <div style="display:flex;gap:1.5rem;">
+                        <button id="generate-exploit-btn" class="btn btn-primary" style="padding:1rem 2rem;">GENERATE
+                            POC REQUEST</button>
+                        <button id="export-pdf-btn" class="btn btn-success" style="padding:1rem 2rem;">EXPORT
+                            INTEL</button>
+                    </div>
+                </div>
+                <div id="vulnerability-list" class="vulnerability-list"></div>
+            </div>
+
+            <!-- 4. Exploit Generator -->
+            <div id="exploit-section" class="poc-section" style="display:none;">
+                <div class="card-header">
+                    <h3 class="card-title">🔨 SMUGGLING EXPLOIT GENERATOR</h3>
+                </div>
+                <div class="poc-content">
+                    <div class="poc-tabs" style="display:flex;gap:1rem;margin-bottom:2rem;">
+                        <button class="btn btn-ghost active" data-tab="cl-te"
+                            style="padding:0.75rem 1.5rem;">CL.TE</button>
+                        <button class="btn btn-ghost" data-tab="te-cl" style="padding:0.75rem 1.5rem;">TE.CL</button>
+                        <button class="btn btn-ghost" data-tab="http2" style="padding:0.75rem 1.5rem;">H2
+                            DESYNC</button>
+                    </div>
+                    <div class="poc-code-container"
+                        style="background:#000;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;">
+                        <div class="poc-code-header"
+                            style="background:rgba(255,255,255,0.05);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:0.8rem;text-transform:uppercase;color:var(--clr-accent);">Autonomous
+                                Exploit Payload</span>
+                            <button id="copy-exploit-btn" class="btn btn-primary btn-sm">COPY CODE</button>
+                        </div>
+                        <pre id="exploit-code" class="poc-code"
+                            style="padding:2.5rem;color:var(--clr-success);font-family:var(--font-mono);font-size:0.9rem;white-space:pre-wrap;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Research Matrix -->
+            <div class="section-label">Request Smuggling Research Index</div>
+            <div class="technique-grid">
+                <div class="technique-item">
+                    <h4>🔴 CL.TE Desync</h4>
+                    <p>Exploiting cases where the front-end server uses <code>Content-Length</code> but the back-end
+                        uses <code>Transfer-Encoding</code>, allowing a portion of the request to be 'smuggled' to the
+                        next user's transaction.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🔴 HTTP/2 Downgrade</h4>
+                    <p>Exploiting the translation between HTTP/2 (front-end) and HTTP/1.1 (back-end). Smuggling occurs
+                        when the front-end fails to sanitize <code>content-length</code> or
+                        <code>transfer-encoding</code> headers in H2 streams.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 TE.CL Desync</h4>
+                    <p>The inverse attack where the front-end uses <code>Transfer-Encoding</code> and the back-end uses
+                        <code>Content-Length</code>, causing the back-end to pause and wait for the remaining bytes of a
+                        smuggled request.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Web Cache Poisoning</h4>
+                    <p>Using a smuggled request to force the back-end to return a malicious response that the front-end
+                        cache then incorrectly associates with a legitimate URL.</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | Educational Smuggling Module</p>
+    </footer>
+
+    <script type="module" src="../js/firebase-config.js"></script>
+    <script src="../js/smuggling-payloads.js"></script>
+    <script src="../js/smuggling-scanner.js"></script>
+    <script src="../js/scanner-nav.js"></script>
+        <script src="../js/pdf-report.js"></script>
+    <script src="../js/scanner-utils.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

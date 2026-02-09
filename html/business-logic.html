@@ -1,0 +1,277 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec Suite | Business Logic Auditor</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu">
+                <!-- Injected by scanner-nav.js -->
+            </div>
+            <div class="nav-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">Vector-Tests:</span>
+                    <span class="stat-value" id="total-tests">60+</span>
+                </div>
+                <div class="stat-badge">
+                    <span class="stat-label">Bypassed:</span>
+                    <span class="stat-value" id="vuln-badge">0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <h1 class="hero-title">
+            <span class="glowing-text">Business</span> Logic Auditor
+        </h1>
+        <p class="hero-subtitle">
+            Advanced behavioral-state auditor. Automated detection of transactional flaws, race conditions, and trust
+            boundaries bypasses.
+        </p>
+    </section>
+
+    <main class="main-content">
+        <section class="container">
+
+            <!-- 1. Logic Configuration Matrix -->
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">► Transaction Environment</h2>
+                </div>
+
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="target-url">Critical Action URL</label>
+                        <input type="url" id="target-url" class="input"
+                            placeholder="https://api.system.com/v1/checkout/complete">
+                    </div>
+                    <div class="form-group">
+                        <label for="http-method">Request Protocol</label>
+                        <select id="http-method" class="input">
+                            <option value="POST">POST METHOD</option>
+                            <option value="PUT">PUT METHOD</option>
+                            <option value="GET">GET METHOD</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="section-label">Attack Profile Matrix</div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-excessive-trust" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Trust Boundary</span>
+                            <span class="checkbox-desc">Audit for excessive trust in client-side data (e.g., price,
+                                discount).</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-race-conditions" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Race Condition</span>
+                            <span class="checkbox-desc">Audit for concurrency flaws via high-speed parallel
+                                probes.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-logic-bypass" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Flow Bypass</span>
+                            <span class="checkbox-desc">Audit for skipping mandatory steps in multi-stage
+                                workflows.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-integrity" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Data Integrity</span>
+                            <span class="checkbox-desc">Audit for parameter clobbering and state-transition bugs.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-infinite-loop" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Logic Exhaustion</span>
+                            <span class="checkbox-desc">Audit for resource depletion via circular logic triggers.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-parameter-tuning" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Param Overload</span>
+                            <span class="checkbox-desc">Audit for unexpected behavior via boundary-value property
+                                tuning.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="scan-controls">
+                    <button id="start-scan-btn" class="btn btn-primary btn-lg">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" style="margin-right:10px;">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                        Initialize Logic Audit
+                    </button>
+                    <button id="stop-scan-btn" class="btn btn-danger" style="display:none;">Terminate Sequence</button>
+                </div>
+            </div>
+
+            <!-- 2. Execution HUD -->
+            <div id="attack-section" class="attack-viz" style="display:none;">
+                <div class="viz-header">
+                    <h3 class="viz-title">⚡ REAL-TIME LOGIC HUD</h3>
+                    <div class="viz-status">
+                        <span class="status-dot scanning"></span>
+                        <span id="scan-status" style="color:var(--clr-success);">ACTIVE_AUDIT</span>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-info"
+                        style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.85rem;color:var(--clr-accent);">
+                        <span id="progress-text">READY</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-stats"
+                        style="display:grid;grid-template-columns:repeat(3, 1fr);text-align:center;">
+                        <div class="stat-item">
+                            <div class="stat-label">Logic Probes</div>
+                            <div class="stat-number" id="tested-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Exploited</div>
+                            <div class="stat-number" id="vuln-count" style="color:var(--clr-success);">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Verified Safe</div>
+                            <div class="stat-number" id="safe-count" style="color:var(--clr-accent);">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="current-payload">
+                    <div class="payload-header">
+                        <span class="payload-label"
+                            style="text-transform:uppercase;font-size:0.75rem;font-weight:800;letter-spacing:0.1em;color:var(--clr-accent);">Active
+                            Logic Probe</span>
+                        <span class="payload-type-badge" id="current-type"
+                            style="background:var(--clr-primary);">STANDBY</span>
+                    </div>
+                    <pre id="current-test-details"
+                        style="font-size:0.85rem; padding:1.5rem; white-space:pre-wrap;"></pre>
+                </div>
+
+                <div class="live-log">
+                    <div class="log-header">
+                        <span class="log-title">LOGIC TRANSACTION LOG</span>
+                        <button id="clear-log-btn" class="btn btn-ghost btn-sm">Purge</button>
+                    </div>
+                    <div class="log-content" id="attack-log"></div>
+                </div>
+            </div>
+
+            <!-- 3. Intelligence Evidence -->
+            <div id="results-section" class="results-section" style="display:none;">
+                <div class="results-header"
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3rem;">
+                    <h3 class="results-title">► DISCOVERED VECTORS</h3>
+                    <div style="display:flex;gap:1.5rem;">
+                        <button id="generate-exploit-btn" class="btn btn-primary" style="padding:1rem 2rem;">GENERATE
+                            POC REQUEST</button>
+                        <button id="export-pdf-btn" class="btn btn-success" style="padding:1rem 2rem;">EXPORT
+                            INTEL</button>
+                    </div>
+                </div>
+                <div id="vulnerability-list" class="vulnerability-list"></div>
+            </div>
+
+            <!-- 4. Exploit Generator -->
+            <div id="exploit-section" class="poc-section" style="display:none;">
+                <div class="card-header">
+                    <h3 class="card-title">🔨 LOGIC EXPLOIT GENERATOR</h3>
+                </div>
+                <div class="poc-content">
+                    <div class="poc-tabs" style="display:flex;gap:1rem;margin-bottom:2rem;">
+                        <button class="btn btn-ghost active" data-tab="trust"
+                            style="padding:0.75rem 1.5rem;">TRUST-BYPASS</button>
+                        <button class="btn btn-ghost" data-tab="race"
+                            style="padding:0.75rem 1.5rem;">RACE-CONDITION</button>
+                        <button class="btn btn-ghost" data-tab="workflow"
+                            style="padding:0.75rem 1.5rem;">FLOW-BYPASS</button>
+                    </div>
+                    <div class="poc-code-container"
+                        style="background:#000;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;">
+                        <div class="poc-code-header"
+                            style="background:rgba(255,255,255,0.05);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:0.8rem;text-transform:uppercase;color:var(--clr-accent);">Autonomous
+                                Exploit Payload</span>
+                            <button id="copy-exploit-btn" class="btn btn-primary btn-sm">COPY CODE</button>
+                        </div>
+                        <pre id="exploit-code" class="poc-code"
+                            style="padding:2.5rem;color:var(--clr-success);font-family:var(--font-mono);font-size:0.9rem;white-space:pre-wrap;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Research Matrix -->
+            <div class="section-label">Business Logic Research Index</div>
+            <div class="technique-grid">
+                <div class="technique-item">
+                    <h4>🔴 Excessive Trust in Data</h4>
+                    <p>Testing if an application blindly accepts sensitive data from the client, such as product prices
+                        or discount codes in a POST request, without server-side verification.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🔴 Multi-Step Logic Bypass</h4>
+                    <p>Testing if mandatory steps in a process (e.g., verifying a code) can be bypassed by directly
+                        accessing the subsequent URL in the sequence.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Logic Parameter Tuning</h4>
+                    <p>Submitting unexpected values (e.g., negative quantities, extremely large integers) to see if they
+                        cause unintended side effects in the business logic flow.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Concurrency (Race conditions)</h4>
+                    <p>Triggering parallel requests to a single action node to exploit gaps between a "check" (e.g.,
+                        have balance?) and an "action" (e.g., withdraw funds).</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | Educational Logic Module</p>
+    </footer>
+
+    <script type="module" src="../js/firebase-config.js"></script>
+    <script src="../js/business-logic-payloads.js"></script>
+    <script src="../js/business-logic-scanner.js"></script>
+    <script src="../js/scanner-nav.js"></script>
+        <script src="../js/pdf-report.js"></script>
+    <script src="../js/scanner-utils.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

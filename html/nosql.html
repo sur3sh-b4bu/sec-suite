@@ -1,0 +1,286 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec Suite | NoSQL Injection Auditor</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu">
+                <!-- Injected by scanner-nav.js -->
+            </div>
+            <div class="nav-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">Vector-Tests:</span>
+                    <span class="stat-value" id="total-tests">35+</span>
+                </div>
+                <div class="stat-badge">
+                    <span class="stat-label">Discovered:</span>
+                    <span class="stat-value" id="vuln-badge">0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <h1 class="hero-title">
+            <span class="glowing-text">NoSQL</span> Injection Discovery
+        </h1>
+        <p class="hero-subtitle">
+            Advanced document-state auditor. Automated detection of MongoDB Operators, Auth Bypass, and Blind Data
+            Extraction.
+        </p>
+    </section>
+
+    <main class="main-content">
+        <section class="container">
+
+            <!-- 1. NoSQL Configuration Matrix -->
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">► Document Environment</h2>
+                </div>
+
+                <div class="form-group" style="margin-bottom:2rem;">
+                    <label for="target-url">Target Endpoint URL</label>
+                    <input type="url" id="target-url" class="input" placeholder="https://api.system.com/v1/auth/login">
+                </div>
+
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="content-type">Serialization Protocol</label>
+                        <select id="content-type" class="input">
+                            <option value="json">application/json</option>
+                            <option value="urlencoded">application/x-www-form-urlencoded</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="db-type">Target Database Engine</label>
+                        <select id="db-type" class="input">
+                            <option value="mongodb">MongoDB / BSON</option>
+                            <option value="couchdb">CouchDB / JSON</option>
+                            <option value="auto">AUTONOMOUS DETECTION</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top:2rem;">
+                    <label for="username-field">Identity Node (Field Name)</label>
+                    <input type="text" id="username-field" class="input" placeholder="user_id / email / username"
+                        value="username">
+                </div>
+
+                <div class="section-label">Attack Profile Matrix</div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-operator" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Operator Injection</span>
+                            <span class="checkbox-desc">Audit for $gt, $ne, $regex abuse.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-auth" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Auth Override</span>
+                            <span class="checkbox-desc">Bypass login logic via tautological operators.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-js" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">JavaScript Context</span>
+                            <span class="checkbox-desc">Audit $where clause for arbitrary script execution.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-extract" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Data Extraction</span>
+                            <span class="checkbox-desc">Auto-extract fields via regex-based character fuzzing.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-url" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Param Object Audit</span>
+                            <span class="checkbox-desc">Test for nested object injection in URL parameters.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-blind" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Time-Based Blind</span>
+                            <span class="checkbox-desc">Audit for execution via sleep() in JS contexts.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="scan-controls">
+                    <button id="start-scan-btn" class="btn btn-primary btn-lg">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" style="margin-right:10px;">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                        Initialize Document Audit
+                    </button>
+                    <button id="stop-scan-btn" class="btn btn-danger" style="display:none;">Terminate Sequence</button>
+                </div>
+            </div>
+
+            <!-- 2. Execution HUD -->
+            <div id="attack-section" class="attack-viz" style="display:none;">
+                <div class="viz-header">
+                    <h3 class="viz-title">⚡ REAL-TIME NoSQL HUD</h3>
+                    <div class="viz-status">
+                        <span class="status-dot scanning"></span>
+                        <span id="scan-status" style="color:var(--clr-success);">ACTIVE_AUDIT</span>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-info"
+                        style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.85rem;color:var(--clr-accent);">
+                        <span id="progress-text">READY</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-stats"
+                        style="display:grid;grid-template-columns:repeat(3, 1fr);text-align:center;">
+                        <div class="stat-item">
+                            <div class="stat-label">Object Probes</div>
+                            <div class="stat-number" id="tested-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Exploited</div>
+                            <div class="stat-number" id="vuln-count" style="color:var(--clr-success);">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Bypassed</div>
+                            <div class="stat-number" id="bypass-count" style="color:var(--clr-danger);">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="current-payload">
+                    <div class="payload-header">
+                        <span class="payload-label"
+                            style="text-transform:uppercase;font-size:0.75rem;font-weight:800;letter-spacing:0.1em;color:var(--clr-accent);">Active
+                            Document Probe</span>
+                        <span class="payload-type-badge" id="current-type"
+                            style="background:var(--clr-primary);">STANDBY</span>
+                    </div>
+                    <pre id="current-test-details"
+                        style="font-size:0.85rem; padding:1.5rem; white-space:pre-wrap;"></pre>
+                </div>
+
+                <div class="live-log">
+                    <div class="log-header">
+                        <span class="log-title">TRANSACTION LOG</span>
+                        <button id="clear-log-btn" class="btn btn-ghost btn-sm">Purge</button>
+                    </div>
+                    <div class="log-content" id="attack-log"></div>
+                </div>
+            </div>
+
+            <!-- 3. Intelligence Evidence -->
+            <div id="results-section" class="results-section" style="display:none;">
+                <div class="results-header"
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3rem;">
+                    <h3 class="results-title">► DISCOVERED VECTORS</h3>
+                    <div style="display:flex;gap:1.5rem;">
+                        <button id="generate-exploit-btn" class="btn btn-primary" style="padding:1rem 2rem;">GENERATE
+                            POC OBJECT</button>
+                        <button id="export-pdf-btn" class="btn btn-success" style="padding:1rem 2rem;">EXPORT
+                            INTEL</button>
+                    </div>
+                </div>
+                <div id="vulnerability-list" class="vulnerability-list"></div>
+            </div>
+
+            <!-- 4. Exploit Generator -->
+            <div id="exploit-section" class="poc-section" style="display:none;">
+                <div class="card-header">
+                    <h3 class="card-title">🔨 NoSQL EXPLOIT GENERATOR</h3>
+                </div>
+                <div class="poc-content">
+                    <div class="poc-tabs" style="display:flex;gap:1rem;margin-bottom:2rem;">
+                        <button class="btn btn-ghost active" data-tab="authbypass"
+                            style="padding:0.75rem 1.5rem;">BYPASS</button>
+                        <button class="btn btn-ghost" data-tab="operator"
+                            style="padding:0.75rem 1.5rem;">OPERATOR</button>
+                        <button class="btn btn-ghost" data-tab="extract"
+                            style="padding:0.75rem 1.5rem;">EXTRACT</button>
+                    </div>
+                    <div class="poc-code-container"
+                        style="background:#000;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;">
+                        <div class="poc-code-header"
+                            style="background:rgba(255,255,255,0.05);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:0.8rem;text-transform:uppercase;color:var(--clr-accent);">Autonomous
+                                Exploit Payload</span>
+                            <button id="copy-exploit-btn" class="btn btn-primary btn-sm">COPY CODE</button>
+                        </div>
+                        <pre id="exploit-code" class="poc-code"
+                            style="padding:2.5rem;color:var(--clr-success);font-family:var(--font-mono);font-size:0.9rem;white-space:pre-wrap;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Research Matrix -->
+            <div class="section-label">NoSQL Injection Research Index</div>
+            <div class="technique-grid">
+                <div class="technique-item">
+                    <h4>🔴 Operator Injection</h4>
+                    <p>Submitting query operators (<code>$ne</code>, <code>$gt</code>, <code>$in</code>) as object
+                        values to change the logic of the database filter.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🔴 Login Logic Bypass</h4>
+                    <p>Forcing an identity match by providing a <code>{"$gt": ""}</code> condition for the password
+                        field, which is true for any non-empty string.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Regex-based Extraction</h4>
+                    <p>Using <code>$regex</code> to test potential password characters one-by-one, binary searching
+                        through the authentication response code.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Server-side JavaScript</h4>
+                    <p>Exploiting the <code>$where</code> operator to execute arbitrary JavaScript on the MongoDB server
+                        for data extraction or DoS.</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | Educational NoSQL Module</p>
+    </footer>
+
+    <script type="module" src="../js/firebase-config.js"></script>
+    <script src="../js/nosql-payloads.js"></script>
+    <script src="../js/nosql-scanner.js"></script>
+    <script src="../js/scanner-nav.js"></script>
+        <script src="../js/pdf-report.js"></script>
+    <script src="../js/scanner-utils.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

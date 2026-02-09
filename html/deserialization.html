@@ -1,0 +1,283 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec Suite | Deserialization Auditor</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu">
+                <!-- Injected by scanner-nav.js -->
+            </div>
+            <div class="nav-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">Vector-Tests:</span>
+                    <span class="stat-value" id="total-tests">80+</span>
+                </div>
+                <div class="stat-badge">
+                    <span class="stat-label">Discovered:</span>
+                    <span class="stat-value" id="vuln-badge">0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <h1 class="hero-title">
+            <span class="glowing-text">Insecure Deserialization</span> Discovery
+        </h1>
+        <p class="hero-subtitle">
+            Automated object-state auditor. Specialized detection for PHP Magic Methods, Java Gadget Chains, and Python
+            Pickle exploitation.
+        </p>
+    </section>
+
+    <main class="main-content">
+        <section class="container">
+
+            <!-- 1. Deserialization Configuration Matrix -->
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">► Object Environment</h2>
+                </div>
+
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="target-url">Target Endpoint</label>
+                        <input type="url" id="target-url" class="input" placeholder="https://app.system.com/profile">
+                    </div>
+                    <div class="form-group">
+                        <label for="cookie-name">Serialized Token Node (Cookie/Hdr)</label>
+                        <input type="text" id="cookie-name" class="input" placeholder="session" value="session">
+                    </div>
+                </div>
+
+                <div class="section-label">State Analysis Engine</div>
+                <div class="form-group" style="margin-bottom:2rem;">
+                    <label for="serialized-data">Raw Serialized Stream (Base64/Hex)</label>
+                    <textarea id="serialized-data" class="input" rows="3" style="font-family:var(--font-mono);"
+                        placeholder="Tzo0OiJVc2VyIjoyOntzOjQ6Im5hbWUiO3M6Ngoid2llbmVyIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6InVzZXJfdG9rZW5faGVyZSI7fQ=="></textarea>
+                </div>
+                <button id="analyze-btn" class="btn btn-secondary" style="width:100%;margin-bottom:3rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        style="margin-right:10px;">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    Analyze Object Integrity
+                </button>
+                <div id="analysis-result"
+                    style="display:none;padding:1.5rem;background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);border-radius:12px;margin-bottom:3rem;font-family:var(--font-mono);font-size:0.85rem;">
+                </div>
+
+                <div class="section-label">Language Stack Matrix</div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-php" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">PHP Magic Methods</span>
+                            <span class="checkbox-desc">Audit for __wakeup, __destruct exploitation.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-java" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Java Gadget Audit</span>
+                            <span class="checkbox-desc">Test for CommonsCollections/Ysoserial chains.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-python" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Python Pickle</span>
+                            <span class="checkbox-desc">Audit for __reduce__ arbitrary execution.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-ruby" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Ruby Marshalling</span>
+                            <span class="checkbox-desc">Fuzz Marshal.load() with gadget payloads.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-dotnet" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">.NET Binary Audit</span>
+                            <span class="checkbox-desc">Detect BinaryFormatter and TypeNameHandling flaws.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-yaml" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">YAML Deserialization</span>
+                            <span class="checkbox-desc">Audit PyYAML/SnakeYAML unsafe loading.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="scan-controls">
+                    <button id="start-scan-btn" class="btn btn-primary btn-lg">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" style="margin-right:10px;">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                        Initialize Object Audit
+                    </button>
+                    <button id="stop-scan-btn" class="btn btn-danger" style="display:none;">Terminate Sequence</button>
+                </div>
+            </div>
+
+            <!-- 2. Execution HUD -->
+            <div id="attack-section" class="attack-viz" style="display:none;">
+                <div class="viz-header">
+                    <h3 class="viz-title">⚡ REAL-TIME OBJECT AUDIT HUD</h3>
+                    <div class="viz-status">
+                        <span class="status-dot scanning"></span>
+                        <span id="scan-status" style="color:var(--clr-success);">ACTIVE_AUDIT</span>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-info"
+                        style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.85rem;color:var(--clr-accent);">
+                        <span id="progress-text">READY</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-stats"
+                        style="display:grid;grid-template-columns:repeat(3, 1fr);text-align:center;">
+                        <div class="stat-item">
+                            <div class="stat-label">Object Probes</div>
+                            <div class="stat-number" id="tested-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Exploited</div>
+                            <div class="stat-number" id="vuln-count" style="color:var(--clr-success);">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">RCE Confirmed</div>
+                            <div class="stat-number" id="rce-count" style="color:var(--clr-danger);">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="current-payload">
+                    <div class="payload-header">
+                        <span class="payload-label"
+                            style="text-transform:uppercase;font-size:0.75rem;font-weight:800;letter-spacing:0.1em;color:var(--clr-accent);">Active
+                            Gadget Probe</span>
+                        <span class="payload-type-badge" id="current-type"
+                            style="background:var(--clr-primary);">STANDBY</span>
+                    </div>
+                    <pre id="current-test-details"
+                        style="font-size:0.85rem; padding:1.5rem; white-space:pre-wrap;"></pre>
+                </div>
+
+                <div class="live-log">
+                    <div class="log-header">
+                        <span class="log-title">OBJECT TRANSACTION LOG</span>
+                        <button id="clear-log-btn" class="btn btn-ghost btn-sm">Purge</button>
+                    </div>
+                    <div class="log-content" id="attack-log"></div>
+                </div>
+            </div>
+
+            <!-- 3. Intelligence Evidence -->
+            <div id="results-section" class="results-section" style="display:none;">
+                <div class="results-header"
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3rem;">
+                    <h3 class="results-title">► DISCOVERED CHAINS</h3>
+                    <div style="display:flex;gap:1.5rem;">
+                        <button id="generate-exploit-btn" class="btn btn-primary" style="padding:1rem 2rem;">GENERATE
+                            GADGET PAYLOAD</button>
+                        <button id="export-pdf-btn" class="btn btn-success" style="padding:1rem 2rem;">EXPORT
+                            INTEL</button>
+                    </div>
+                </div>
+                <div id="vulnerability-list" class="vulnerability-list"></div>
+            </div>
+
+            <!-- 4. Exploit Generator -->
+            <div id="exploit-section" class="poc-section" style="display:none;">
+                <div class="card-header">
+                    <h3 class="card-title">🔨 GADGET PAYLOAD GENERATOR</h3>
+                </div>
+                <div class="poc-content">
+                    <div class="poc-tabs" style="display:flex;gap:1rem;margin-bottom:2rem;">
+                        <button class="btn btn-ghost active" data-tab="php" style="padding:0.75rem 1.5rem;">PHP</button>
+                        <button class="btn btn-ghost" data-tab="java" style="padding:0.75rem 1.5rem;">JAVA</button>
+                        <button class="btn btn-ghost" data-tab="python" style="padding:0.75rem 1.5rem;">PYTHON</button>
+                    </div>
+                    <div class="poc-code-container"
+                        style="background:#000;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;">
+                        <div class="poc-code-header"
+                            style="background:rgba(255,255,255,0.05);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:0.8rem;text-transform:uppercase;color:var(--clr-accent);">Autonomous
+                                Object Payload</span>
+                            <button id="copy-exploit-btn" class="btn btn-primary btn-sm">COPY CODE</button>
+                        </div>
+                        <pre id="exploit-code" class="poc-code"
+                            style="padding:2.5rem;color:var(--clr-success);font-family:var(--font-mono);font-size:0.9rem;white-space:pre-wrap;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Research Matrix -->
+            <div class="section-label">Deserialization Research Index</div>
+            <div class="technique-grid">
+                <div class="technique-item">
+                    <h4>🔴 Magic Method Injection</h4>
+                    <p>Triggering unintended logic execution in PHP <code>__wakeup</code>, <code>__destruct</code>, or
+                        <code>__toString</code> during object recreation.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🔴 Java Gadget Chains</h4>
+                    <p>Leveraging existing classes in the classpath to form a chain of method calls that ultimately
+                        leads to arbitrary command execution.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Python Pickle Native</h4>
+                    <p>The <code>pickle</code> module is fundamentally insecure. Deserializing untrusted data leads to
+                        direct RCE via <code>__reduce__</code>.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 YAML Unsafe Load</h4>
+                    <p>Exploiting default unsafe loaders in YAML parsers to instantiate arbitrary classes and trigger
+                        code execution.</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | Educational Object Module</p>
+    </footer>
+
+    <script type="module" src="../js/firebase-config.js"></script>
+    <script src="../js/deserialization-payloads.js"></script>
+    <script src="../js/deserialization-scanner.js"></script>
+    <script src="../js/scanner-nav.js"></script>
+        <script src="../js/pdf-report.js"></script>
+    <script src="../js/scanner-utils.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

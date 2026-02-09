@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -e
+
+printf "\n> \033[1;4mseclists\e[0m ~ \033[3mCollection of multiple type of security lists\e[0m\n\n"
+
+tree /snap/seclists/current -L 1 -d --noreport -I "usr|meta|snap"

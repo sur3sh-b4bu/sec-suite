@@ -1,0 +1,294 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec Suite | CORS Vulnerability Scanner</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu">
+                <!-- Injected by scanner-nav.js -->
+            </div>
+            <div class="nav-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">Matrix-Tests:</span>
+                    <span class="stat-value" id="total-tests">12+</span>
+                </div>
+                <div class="stat-badge">
+                    <span class="stat-label">Discovered:</span>
+                    <span class="stat-value" id="vuln-badge">0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <h1 class="hero-title">
+            <span class="glowing-text">CORS</span> Discovery
+        </h1>
+        <p class="hero-subtitle">
+            Cross-Origin Resource Sharing auditor. Automated detection for Origin reflection, credential leaks, and
+            domain trust misconfigurations.
+        </p>
+    </section>
+
+    <main class="main-content">
+        <section class="container">
+
+            <!-- 1. CORS Configuration -->
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">► Resource Endpoint</h2>
+                </div>
+
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="target-url">API Target URL</label>
+                        <input type="url" id="target-url" class="input"
+                            placeholder="https://api.vulnerable.com/user/details">
+                    </div>
+                    <div class="form-group">
+                        <label for="http-method">Access Method</label>
+                        <select id="http-method" class="input">
+                            <option value="GET">GET REQUEST</option>
+                            <option value="POST">POST REQUEST</option>
+                            <option value="PUT">PUT REQUEST</option>
+                            <option value="OPTIONS">OPTIONS (PREFLIGHT)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="section-label">Audit Control Point</div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-null-origin" checked>
+                        <div class="checkbox-content"><span class="checkbox-title">Null Origin</span><span
+                                class="checkbox-desc">Audit for 'Origin: null' acceptance.</span></div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-reflection" checked>
+                        <div class="checkbox-content"><span class="checkbox-title">Reflection Matrix</span><span
+                                class="checkbox-desc">Test if any origin is reflected in ACAO.</span></div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-wildcard" checked>
+                        <div class="checkbox-content"><span class="checkbox-title">Wildcard Audit</span><span
+                                class="checkbox-desc">Detect insecure ACAO: * headers.</span></div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-credentials" checked>
+                        <div class="checkbox-content"><span class="checkbox-title">Credential Leak</span><span
+                                class="checkbox-desc">Monitor for ACAC: true with loose origins.</span></div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-subdomain" checked>
+                        <div class="checkbox-content"><span class="checkbox-title">Subdomain Trust</span><span
+                                class="checkbox-desc">Analyze suffix/prefix trust logic flaws.</span></div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-insecure-protocol" checked>
+                        <div class="checkbox-content"><span class="checkbox-title">Protocol Bypass</span><span
+                                class="checkbox-desc">Allowing insecure HTTP origins to HTTPS.</span></div>
+                    </label>
+                </div>
+
+                <div class="section-label">Custom Origin Injection</div>
+                <div id="origins-container" style="display:flex;flex-direction:column;gap:1rem;margin-bottom:2rem;">
+                    <div class="origin-row" style="display:grid;grid-template-columns:1fr 50px;gap:1.5rem;">
+                        <input type="text" class="input origin-input" placeholder="https://attacker-domain.net">
+                        <button class="btn btn-danger btn-sm remove-origin"
+                            style="padding:0;width:50px;height:50px;border-radius:10px;">✕</button>
+                    </div>
+                </div>
+                <button id="add-origin-btn" class="btn btn-primary btn-sm"
+                    style="padding:1rem 2rem;margin-bottom:3rem;">+ Add Custom Origin Probe</button>
+
+                <div class="scan-controls">
+                    <button id="start-scan-btn" class="btn btn-primary btn-lg">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" style="margin-right:10px;">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                        Initialize CORS Audit
+                    </button>
+                    <button id="stop-scan-btn" class="btn btn-danger" style="display:none;">Terminate Sequence</button>
+                </div>
+            </div>
+
+            <!-- 2. Execution HUD -->
+            <div id="test-section" class="attack-viz" style="display:none;">
+                <div class="viz-header">
+                    <h3 class="viz-title">⚡ DYNAMIC CORS ANALYZER HUD</h3>
+                    <div class="viz-status">
+                        <span class="status-dot scanning"></span>
+                        <span id="scan-status">ANALYZING...</span>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-info"
+                        style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.85rem;color:var(--clr-accent);">
+                        <span id="progress-text">READY</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-stats"
+                        style="display:grid;grid-template-columns:repeat(3, 1fr);text-align:center;">
+                        <div class="stat-item">
+                            <div class="stat-label">Total Matrix</div>
+                            <div class="stat-number" id="tested-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Exploited</div>
+                            <div class="stat-number" id="vuln-count" style="color:var(--clr-success);">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Filtered</div>
+                            <div class="stat-number" id="secure-count" style="color:var(--clr-danger);">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="current-test">
+                    <div class="test-header">
+                        <span class="test-label"
+                            style="text-transform:uppercase;font-size:0.75rem;font-weight:800;letter-spacing:0.1em;color:var(--clr-accent);">Active
+                            Probe</span>
+                        <span class="test-type-badge" id="current-type"
+                            style="background:var(--clr-primary);">STANDBY</span>
+                    </div>
+                    <div class="test-details-grid"
+                        style="display:grid;grid-template-columns:repeat(4, 1fr);gap:1.5rem;margin-top:2rem;background:rgba(0,0,0,0.3);padding:2rem;border-radius:12px;border:1px solid var(--glass-border);font-family:var(--font-mono);font-size:0.8rem;">
+                        <div>Origin: <span id="test-origin" style="color:var(--clr-accent);">--</span></div>
+                        <div>ACAO: <span id="test-acao" style="color:var(--clr-accent);">--</span></div>
+                        <div>ACAC: <span id="test-acac" style="color:var(--clr-accent);">--</span></div>
+                        <div>Status: <span id="test-status" style="color:var(--clr-accent);">--</span></div>
+                    </div>
+                </div>
+
+                <div class="live-log">
+                    <div class="log-header">
+                        <span class="log-title">TRANSACTION LOG</span>
+                        <button id="clear-log-btn" class="btn btn-ghost btn-sm">Purge</button>
+                    </div>
+                    <div class="log-content" id="test-log"></div>
+                </div>
+            </div>
+
+            <!-- 3. Intelligence Evidence -->
+            <div id="results-section" class="results-section" style="display:none;">
+                <div class="results-header"
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3rem;">
+                    <h3 class="results-title">► DISCOVERED VECTORS</h3>
+                    <div style="display:flex;gap:1.5rem;">
+                        <button id="generate-exploit-btn" class="btn btn-primary" style="padding:1rem 2rem;">GENERATE
+                            POC SCRIPT</button>
+                        <button id="export-pdf-btn" class="btn btn-success" style="padding:1rem 2rem;">EXPORT
+                            INTEL</button>
+                    </div>
+                </div>
+                <div id="vulnerability-list" class="vulnerability-list"></div>
+            </div>
+
+            <!-- 4. Exploit Generator -->
+            <div id="exploit-section" class="poc-section" style="display:none;">
+                <div class="card-header">
+                    <h3 class="card-title">🔨 POC EXPLOIT GENERATOR</h3>
+                </div>
+                <div class="poc-content">
+                    <div class="poc-tabs" style="display:flex;gap:1rem;margin-bottom:2rem;">
+                        <button class="btn btn-ghost active" data-tab="fetch" style="padding:0.75rem 1.5rem;">FETCH
+                            API</button>
+                        <button class="btn btn-ghost" data-tab="xhr" style="padding:0.75rem 1.5rem;">XHR</button>
+                    </div>
+                    <div class="poc-code-container"
+                        style="background:#000;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;">
+                        <div class="poc-code-header"
+                            style="background:rgba(255,255,255,0.05);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:0.8rem;text-transform:uppercase;color:var(--clr-accent);">Autonomous
+                                Exploit Payload</span>
+                            <button id="copy-exploit-btn" class="btn btn-primary btn-sm">COPY CODE</button>
+                        </div>
+                        <pre id="exploit-code" class="poc-code"
+                            style="padding:2.5rem;color:var(--clr-success);font-family:var(--font-mono);font-size:0.9rem;white-space:pre-wrap;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Vulnerability Research Matrix -->
+            <div class="section-label">CORS Misconfiguration Index</div>
+            <div class="technique-grid">
+                <div class="technique-item">
+                    <h4>🔴 Origin Reflection</h4>
+                    <p>The server reflects any domain in the <code>Origin</code> header into the
+                        <code>Access-Control-Allow-Origin</code> response, creating a universal trust flaw.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🔴 Null Origin Vulnerability</h4>
+                    <p>Trusting the <code>null</code> origin allows exploits from sandboxed iframes or local files to
+                        exfiltrate data.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Regex Trust Flaws</h4>
+                    <p>Poorly implemented regex (e.g. <code>victim.com</code>) allowing bypass via
+                        <code>attacker-victim.com</code> or <code>victim.com.evil.net</code>.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Insecure Protocol Bridge</h4>
+                    <p>Allowing <code>http://domain.com</code> to access resources on <code>https://domain.com</code>,
+                        exposing credentials to MITM.</p>
+                </div>
+            </div>
+
+            <!-- 6. Defense Matrix -->
+            <div class="section-label">Defense Heuristics</div>
+            <div class="technique-grid">
+                <div class="technique-item">
+                    <h4>✓ Whitelist Identity</h4>
+                    <p>Explicitly check the <code>Origin</code> against a hard-coded whitelist of trusted domains. Never
+                        use reflection.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>✓ Deny Credentials</h4>
+                    <p>Disable <code>Access-Control-Allow-Credentials</code> unless absolutely required for cross-origin
+                        state management.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>✓ Strict CORS Filter</h4>
+                    <p>Implement server-side middleware that uniformly rejects any non-whitelisted cross-origin request
+                        before processing.</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | Educational CORS Module</p>
+    </footer>
+
+    <script type="module" src="../js/firebase-config.js"></script>
+    <script src="../js/cors-scanner.js"></script>
+    <script src="../js/scanner-nav.js"></script>
+        <script src="../js/pdf-report.js"></script>
+    <script src="../js/scanner-utils.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

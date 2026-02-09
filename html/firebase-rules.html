@@ -1,0 +1,240 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Security Rules Analyzer | CyberSec Suite</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/firebase-gcp-styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div class="hud-decoration hud-top-left" style="background: linear-gradient(135deg, #8b5cf6, #3b82f6);"></div>
+    <div class="hud-decoration hud-bottom-right"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu"></div>
+            <div class="nav-stats">
+                <div class="stat-badge"><span class="stat-label">Scanner:</span><span class="stat-value"
+                        id="scanner-status">READY</span></div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <section class="hero-section">
+            <div class="hero-badge"
+                style="background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.3); color: #8b5cf6;">
+                <i data-lucide="file-code"></i>
+                <span>Security Rules</span>
+            </div>
+            <h1 class="hero-title"><span class="glowing-text">Rules</span> Security Analyzer</h1>
+            <p class="hero-subtitle">Analyze Firebase Security Rules for Firestore, Realtime Database, and Storage.
+                Detect dangerous patterns and misconfigurations.</p>
+        </section>
+
+        <section class="container">
+            <div class="stats-overview">
+                <div class="stat-box">
+                    <div class="stat-number" id="total-modules">15</div>
+                    <div class="stat-label">Rule Patterns</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="total-checks">0</div>
+                    <div class="stat-label">Rules Analyzed</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="vulns-found">0</div>
+                    <div class="stat-label">Issues Found</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="scan-time">0s</div>
+                    <div class="stat-label">Duration</div>
+                </div>
+            </div>
+
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">Rules Input</h2>
+                </div>
+
+                <div class="form-group">
+                    <label for="rules-type">Rules Type</label>
+                    <select id="rules-type" class="input">
+                        <option value="firestore">Firestore Security Rules</option>
+                        <option value="rtdb">Realtime Database Rules (JSON)</option>
+                        <option value="storage">Cloud Storage Rules</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="rules-input">Paste Security Rules</label>
+                    <textarea id="rules-input" class="input" rows="12" placeholder="rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;  // DANGEROUS!
+    }
+  }
+}"></textarea>
+                </div>
+
+                <div class="section-label">Dangerous Pattern Detection</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="pattern-allow-all" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Allow All Access</span>
+                            <span class="checkbox-desc">Detect "allow read, write: if true" patterns</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="pattern-wildcard" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Wildcard Abuse</span>
+                            <span class="checkbox-desc">Find overly broad {document=**} matches</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="pattern-missing-auth" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Missing Auth Checks</span>
+                            <span class="checkbox-desc">Rules without request.auth verification</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="pattern-uid-trust" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Client UID Trust</span>
+                            <span class="checkbox-desc">Trusting resource.data.uid without verification</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="pattern-admin-flag" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Admin Flag in Data</span>
+                            <span class="checkbox-desc">Checking isAdmin in client-writable fields</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="pattern-cross-doc" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Cross-Document Access</span>
+                            <span class="checkbox-desc">Missing document ownership verification</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="pattern-write-own" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Write Without Read</span>
+                            <span class="checkbox-desc">Write permissions without read (data exfil)</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="pattern-timestamp" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Timestamp Bypass</span>
+                            <span class="checkbox-desc">Missing server timestamp enforcement</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="pattern-size-limit" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Missing Size Limits</span>
+                            <span class="checkbox-desc">No resource.size checks for uploads</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="pattern-content-type" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Content Type Bypass</span>
+                            <span class="checkbox-desc">Missing contentType validation</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="pattern-rate-limit">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">No Rate Limiting</span>
+                            <span class="checkbox-desc">Missing write rate limiting patterns</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="pattern-delete-all">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Mass Delete Risk</span>
+                            <span class="checkbox-desc">Allow delete on collections without limits</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button class="btn btn-primary btn-lg" id="start-scan-btn"><i data-lucide="search"></i>Analyze
+                        Rules</button>
+                    <button class="btn" id="load-sample-btn"
+                        style="background: rgba(139,92,246,0.1); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.3);"><i
+                            data-lucide="file-plus"></i>Load Vulnerable Sample</button>
+                </div>
+            </div>
+
+            <div class="attack-viz" id="attack-section" style="display:none;">
+                <div class="card-header" style="border-color:#8b5cf6;">
+                    <h2 class="card-title">Rules Analysis Results</h2>
+                </div>
+                <div class="results-summary">
+                    <div class="summary-card success">
+                        <div class="summary-icon"><i data-lucide="check-circle"></i></div>
+                        <div class="summary-value" id="passed-count">0</div>
+                        <div class="summary-label">Secure</div>
+                    </div>
+                    <div class="summary-card warning">
+                        <div class="summary-icon"><i data-lucide="alert-triangle"></i></div>
+                        <div class="summary-value" id="warning-count">0</div>
+                        <div class="summary-label">Warnings</div>
+                    </div>
+                    <div class="summary-card danger">
+                        <div class="summary-icon"><i data-lucide="shield-alert"></i></div>
+                        <div class="summary-value" id="vuln-count">0</div>
+                        <div class="summary-label">Critical</div>
+                    </div>
+                    <div class="summary-card info">
+                        <div class="summary-icon"><i data-lucide="info"></i></div>
+                        <div class="summary-value" id="info-count">0</div>
+                        <div class="summary-label">Info</div>
+                    </div>
+                </div>
+                <div class="live-log">
+                    <div class="log-header"><span><span class="status-dot scanning"></span>Analysis Log</span><button
+                            class="log-btn" id="clear-log-btn">Clear</button></div>
+                    <div class="log-content" id="attack-log">
+                        <div class="log-entry info">[System] Rules Analyzer ready</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section" id="results-section" style="display:none;">
+                <div class="card-header" style="border-color:#8b5cf6;">
+                    <h2 class="card-title">Security Rule Issues</h2>
+                </div>
+                <div id="vulnerability-list"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | Firebase Rules Analyzer v1.0</p>
+    </footer>
+    <script src="../js/scanner-nav.js"></script>
+    <script src="../js/firebase-rules-scanner.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

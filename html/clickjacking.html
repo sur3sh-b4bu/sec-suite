@@ -1,0 +1,310 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec Suite | Clickjacking Auditor</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu">
+                <!-- Injected by scanner-nav.js -->
+            </div>
+            <div class="nav-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">Vector-Tests:</span>
+                    <span class="stat-value" id="total-tests">10+</span>
+                </div>
+                <div class="stat-badge">
+                    <span class="stat-label">Frameable:</span>
+                    <span class="stat-value" id="frameable-badge">ANALYZING</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <h1 class="hero-title">
+            <span class="glowing-text">Clickjacking</span> Discovery
+        </h1>
+        <p class="hero-subtitle">
+            UI Redressing and framing auditor. Specialized detection of X-Frame-Options bypass, CSP violations, and
+            visual overlay exploitation.
+        </p>
+    </section>
+
+    <main class="main-content">
+        <section class="container">
+
+            <!-- 1. Framing Configuration Matrix -->
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">► UI Environment</h2>
+                </div>
+
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="target-url">Target Display URL</label>
+                        <input type="url" id="target-url" class="input" placeholder="https://app.com/my-account">
+                    </div>
+                    <div class="form-group">
+                        <label for="target-action">Action Node Selector</label>
+                        <input type="text" id="target-action" class="input" placeholder="#delete-account-btn">
+                    </div>
+                </div>
+
+                <div class="section-label">UI Attack Profile</div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-basic" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Frame Resilience</span>
+                            <span class="checkbox-desc">Audit for basic iframe embedding acceptance.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-xfo" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">X-Frame Leak</span>
+                            <span class="checkbox-desc">Detect missing or weak X-Frame-Options headers.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-csp" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">CSP Ancestry</span>
+                            <span class="checkbox-desc">Analyze frame-ancestors directive vulnerabilities.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-opacity" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Alpha Overlay</span>
+                            <span class="checkbox-desc">Audit for transparent UI redressing durability.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-drag-drop" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Drag Exfiltration</span>
+                            <span class="checkbox-desc">Test for cross-origin drag-and-drop data leaks.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-multistep" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Sequence Chain</span>
+                            <span class="checkbox-desc">Audit for multi-click confirmation bypass.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="section-label">Shadow Customization</div>
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="decoy-text">Decoy Narrative</label>
+                        <input type="text" id="decoy-text" class="input" value="Click here to claim reward!">
+                    </div>
+                    <div class="form-group">
+                        <label for="iframe-opacity">Probe Transparency</label>
+                        <div style="display:flex;align-items:center;gap:1.5rem;">
+                            <input type="range" id="iframe-opacity" class="range-input" min="0" max="1" step="0.05"
+                                value="0.6" style="flex:1;">
+                            <span id="opacity-value" class="stat-value" style="width:40px;">0.6</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-label">Spatial Alignment</div>
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="iframe-top">Iframe Top Offset (px)</label>
+                        <input type="number" id="iframe-top" class="input" value="100" placeholder="e.g. 150">
+                    </div>
+                    <div class="form-group">
+                        <label for="iframe-left">Iframe Left Offset (px)</label>
+                        <input type="number" id="iframe-left" class="input" value="300" placeholder="e.g. 200">
+                    </div>
+                    <div class="form-group">
+                        <label for="iframe-width">Iframe Width (px)</label>
+                        <input type="number" id="iframe-width" class="input" value="1000" placeholder="e.g. 1200">
+                    </div>
+                    <div class="form-group">
+                        <label for="iframe-height">Iframe Height (px)</label>
+                        <input type="number" id="iframe-height" class="input" value="600" placeholder="e.g. 800">
+                    </div>
+                </div>
+
+                <div class="scan-controls">
+                    <button id="start-scan-btn" class="btn btn-primary btn-lg">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" style="margin-right:10px;">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                        Initialize UI Audit
+                    </button>
+                    <button id="live-preview-btn" class="btn btn-secondary btn-lg">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" style="margin-right:10px;">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        Shadow Preview
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. Execution HUD -->
+            <div id="test-results" class="attack-viz" style="display:none;">
+                <div class="viz-header">
+                    <h3 class="viz-title">⚡ REAL-TIME UI REDRESSING HUD</h3>
+                    <div class="viz-status">
+                        <span class="status-dot scanning"></span>
+                        <span id="scan-status" style="color:var(--clr-success);">ACTIVE_AUDIT</span>
+                    </div>
+                </div>
+
+                <div id="vuln-status"
+                    style="margin-bottom:2rem;background:rgba(255,255,255,0.05);padding:1.5rem;border-radius:12px;border:1px solid var(--glass-border);text-align:center;font-family:var(--font-mono);">
+                    <span class="status-icon">⚠️</span> <span class="status-text"
+                        style="color:var(--clr-accent);">SCANNING_HEADERS</span>
+                </div>
+
+                <div class="test-grid"
+                    style="display:grid;grid-template-columns:repeat(2, 1fr);gap:1.5rem;margin-bottom:2rem;">
+                    <div class="technique-item" id="test-card-basic" style="margin:0;">
+                        <h4 style="display:flex;justify-content:space-between;">Frame Acceptance <span
+                                class="test-status">--</span></h4>
+                        <p>Fundamental check for <code>iframe</code> encapsulation.</p>
+                    </div>
+                    <div class="technique-item" id="test-card-xfo" style="margin:0;">
+                        <h4 style="display:flex;justify-content:space-between;">XFO Audit <span
+                                class="test-status">--</span></h4>
+                        <p>Detection of <code>X-Frame-Options</code> integrity.</p>
+                    </div>
+                    <div class="technique-item" id="test-card-csp" style="margin:0;">
+                        <h4 style="display:flex;justify-content:space-between;">CSP Ancestry <span
+                                class="test-status">--</span></h4>
+                        <p>Audit for <code>frame-ancestors</code> directive.</p>
+                    </div>
+                    <div class="technique-item" id="test-card-framebusting" style="margin:0;">
+                        <h4 style="display:flex;justify-content:space-between;">Script Analysis <span
+                                class="test-status">--</span></h4>
+                        <p>Search for JS-based frame-busting logic.</p>
+                    </div>
+                </div>
+
+                <div class="live-log">
+                    <div class="log-header">
+                        <span class="log-title">UI INTERCEPT LOG</span>
+                        <button id="clear-log-btn" class="btn btn-ghost btn-sm">Purge</button>
+                    </div>
+                    <div class="log-content" id="test-log"></div>
+                </div>
+            </div>
+
+            <!-- 3. Shadow Preview Module -->
+            <div id="live-preview-section" class="poc-section" style="display:none;margin-top:4rem;">
+                <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                    <h3 class="card-title">👁️ SHADOW PREVIEW ENGINE</h3>
+                    <div style="display:flex;gap:1rem;">
+                        <button id="toggle-overlay-btn" class="btn btn-primary btn-sm">TOGGLE SHADOW</button>
+                        <button id="close-preview-btn" class="btn btn-ghost btn-sm">PURGE PREVIEW</button>
+                    </div>
+                </div>
+                <div class="poc-content" style="padding:0;overflow:hidden;background:#1a1a1a;">
+                    <div
+                        style="background:rgba(59, 130, 246, 0.1);padding:1rem 2rem;border-bottom:1px solid var(--clr-primary);color:var(--clr-primary);font-size:0.8rem;text-align:center;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;">
+                        Active UI Redressing Simulation | Click intercept active
+                    </div>
+                    <div id="clickjacking-demo"
+                        style="position:relative;height:700px;background:#fff;overflow:hidden;border-radius:0 0 12px 12px;">
+                        <!-- Decoy is BELOW the iframe -->
+                        <div id="decoy-layer"
+                            style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:10;display:flex;justify-content:center;align-items:center;background:#fff;">
+                            <button id="decoy-button" class="btn btn-primary btn-lg">CLICK HERE FOR REWARD</button>
+                        </div>
+                        <!-- Iframe is ON TOP with precise shifting -->
+                        <iframe id="target-iframe"
+                            style="position:absolute;top:50%;left:50%;width:1200px;height:800px;border:none;opacity:0.6;z-index:20;pointer-events:all;"
+                            sandbox="allow-same-origin allow-scripts allow-forms allow-top-navigation-by-user-activation"></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Exploit Evidence -->
+            <div id="poc-section" class="results-section" style="display:none;">
+                <div class="results-header"
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3rem;">
+                    <h3 class="results-title">► DISCOVERED VECTORS</h3>
+                    <button id="copy-poc-btn" class="btn btn-primary" style="padding:1rem 2rem;">COPY POC HTML</button>
+                </div>
+                <div class="poc-content">
+                    <div class="poc-tabs" style="display:flex;gap:1rem;margin-bottom:2rem;">
+                        <button class="btn btn-ghost active" data-tab="basic"
+                            style="padding:0.75rem 1.5rem;">BASIC</button>
+                        <button class="btn btn-ghost" data-tab="opacity" style="padding:0.75rem 1.5rem;">ALPHA</button>
+                        <button class="btn btn-ghost" data-tab="drag" style="padding:0.75rem 1.5rem;">DRAG</button>
+                    </div>
+                    <div class="poc-code-container"
+                        style="background:#000;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;">
+                        <pre id="poc-code" class="poc-code"
+                            style="padding:2.5rem;color:var(--clr-success);font-family:var(--font-mono);font-size:0.9rem;white-space:pre-wrap;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Research Matrix -->
+            <div class="section-label">Clickjacking Vulnerability Index</div>
+            <div class="technique-grid">
+                <div class="technique-item">
+                    <h4>🔴 Basic UI Redressing</h4>
+                    <p>Embedding a target application within a transparent iframe precisely over decoy content to
+                        deceive users into clicking hidden nodes.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🔴 XFO Bypass</h4>
+                    <p>Detecting missing <code>X-Frame-Options</code> or insecure configurations that allow malicious
+                        origin embedding.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 CSP Ancestors Flaw</h4>
+                    <p>Exploiting overly permissive <code>frame-ancestors</code> directives in the Content Security
+                        Policy.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Multi-Step Chaining</h4>
+                    <p>Force-matching user navigation via multiple invisible clicks to bypass confirmation or
+                        multi-factor UI prompts.</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | Educational UI Module</p>
+    </footer>
+
+    <script type="module" src="../js/firebase-config.js"></script>
+    <script src="../js/clickjacking-scanner.js"></script>
+    <script src="../js/scanner-nav.js"></script>
+        <script src="../js/pdf-report.js"></script>
+    <script src="../js/scanner-utils.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

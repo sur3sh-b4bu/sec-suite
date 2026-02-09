@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec Suite | Brute Force Nexus [Serverless Edition]</title>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Shared Styles (Glassmorphism & HUD) -->
+    <link rel="stylesheet" href="../css/styles.css">
+
+    <style>
+        /* Specialized Internal HUD Styles */
+        :root {
+            --clr-accent: #8b5cf6;
+            --clr-success: #10b981;
+            --clr-error: #ef4444;
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --font-mono: 'Fira Code', 'Courier New', monospace;
+        }
+
+        .brute-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+            height: calc(100vh - 250px);
+        }
+
+        /* Sidebar Tree Browser */
+        .seclist-browser {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .browser-header {
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .import-btn {
+            width: 100%;
+            background: var(--clr-accent);
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .import-btn:hover {
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+            filter: brightness(1.1);
+        }
+
+        .tree-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.75rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+
+        .tree-node {
+            margin-left: 1rem;
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tree-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+            color: #94a3b8;
+        }
+
+        .tree-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #f1f5f9;
+        }
+
+        .tree-item.active {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--clr-accent);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .folder-icon {
+            color: #eab308;
+            width: 14px;
+            height: 14px;
+        }
+
+        .file-icon {
+            color: #94a3b8;
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Configuration Panel */
+        .request-area {
+            width: 100%;
+            height: 220px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--clr-success);
+            font-family: var(--font-mono);
+            padding: 1.25rem;
+            resize: none;
+            outline: none;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .active-file-hud {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(139, 92, 246, 0.05);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            margin-bottom: 1rem;
+        }
+
+        /* Log Entry Custom Styles */
+        .log-entry {
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            padding: 8px 15px;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .log-entry:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-left-color: var(--clr-accent);
+        }
+
+        .log-match {
+            border-left-color: var(--clr-success) !important;
+            background: rgba(52, 211, 153, 0.05);
+        }
+
+        .inspect-hint {
+            position: absolute;
+            right: 15px;
+            font-size: 0.65rem;
+            opacity: 0;
+            color: var(--clr-accent);
+        }
+
+        .log-entry:hover .inspect-hint {
+            opacity: 1;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #1e293b;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            height: calc(100vh - 4rem);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #folder-picker {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div id="nav-target" class="nav-menu"></div>
+            <div class="nav-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">Memory:</span>
+                    <span class="stat-value" id="hud-mem">0.00 MB</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <div class="container">
+            <h1 class="hero-title">
+                <span class="glowing-text">Brute</span> Force Nexus
+            </h1>
+            <p class="hero-subtitle">Serverless Local Directory Processor // High-Performance Wordlist HUD</p>
+        </div>
+    </section>
+
+    <main class="main-content">
+        <div class="container">
+
+            <div class="brute-grid">
+                <!-- Left: Local File Browser -->
+                <aside class="seclist-browser">
+                    <div class="browser-header">
+                        <button class="import-btn" onclick="document.getElementById('folder-picker').click()">
+                            <i data-lucide="folder-plus" style="width:16px;"></i> LOAD LOCAL WORDLISTS
+                        </button>
+                        <input type="file" id="folder-picker" webkitdirectory multiple>
+                        <div id="file-count-label"
+                            style="font-size: 0.65rem; color: #64748b; text-transform: uppercase; font-weight: 700;">
+                            Awaiting User Selection...
+                        </div>
+                    </div>
+                    <div class="tree-container" id="tree-container">
+                        <div style="text-align: center; opacity: 0.3; margin-top: 4rem;">
+                            <i data-lucide="shield-alert" style="width: 40px; height: 40px; margin-bottom: 1rem;"></i>
+                            <p style="font-size: 0.75rem;">Select your local SecLists folder<br>to begin indexing.</p>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Right: Configuration & Execution -->
+                <div class="config-pane">
+
+                    <div id="active-file-info" class="active-file-hud" style="display:none;">
+                        <i data-lucide="file-check" style="color:var(--clr-accent); width:20px;"></i>
+                        <div style="flex:1;">
+                            <div style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase;">Active wordlist
+                            </div>
+                            <div id="active-filename" style="font-weight: 700; color: #f1f5f9; font-size: 0.9rem;">No
+                                file loaded</div>
+                        </div>
+                        <div id="active-line-count"
+                            style="background:rgba(52, 211, 153, 0.1); color:#34d399; padding:4px 8px; border-radius:4px; font-size:0.7rem; font-family:var(--font-mono); border:1px solid rgba(52, 211, 153, 0.2);">
+                            0 lines
+                        </div>
+                    </div>
+
+                    <div class="config-card">
+                        <div class="card-header" style="padding: 1.25rem 1.5rem; justify-content:space-between;">
+                            <h2 class="card-title">► Configuration</h2>
+                            <button id="preview-payload-btn" class="btn btn-ghost btn-sm">
+                                <i data-lucide="eye" style="width:14px; margin-right:5px;"></i> Preview Sequence
+                            </button>
+                        </div>
+
+                        <div style="padding: 1.5rem;">
+                            <div class="form-group">
+                                <div
+                                    style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <label style="margin:0;">Target Template</label>
+                                    <button id="insert-payload-btn" class="btn btn-ghost btn-sm"
+                                        style="border:1px solid var(--glass-border); color:var(--clr-accent);">
+                                        <i data-lucide="plus" style="width:12px; margin-right:4px;"></i> Use §payload§
+                                    </button>
+                                </div>
+                                <textarea id="request-input" class="request-area"
+                                    placeholder="http://vulnerable-lab.com/login?user=admin&pass=§payload§"></textarea>
+                            </div>
+
+                            <div class="config-grid"
+                                style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; margin-top:1.5rem;">
+                                <div class="form-group">
+                                    <label>Thread Latency</label>
+                                    <select id="thread-delay" class="input">
+                                        <option value="0">Turbo (0ms)</option>
+                                        <option value="100">Fast (100ms)</option>
+                                        <option value="500" selected>Balanced (500ms)</option>
+                                        <option value="1000">Stealth (1000ms)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Success Match (Regex)</label>
+                                    <input type="text" id="success-regex" class="input"
+                                        placeholder="e.g. 200 OK | Welcome">
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 2rem; display:flex; gap:1rem;">
+                                <button id="start-scan-btn" class="btn btn-primary btn-lg" style="flex:1;">
+                                    <i data-lucide="zap" style="width:18px; margin-right:10px;"></i> INITIALIZE ATTACK
+                                </button>
+                                <button id="stop-scan-btn" class="btn btn-danger btn-lg" style="flex:1; display:none;">
+                                    <i data-lucide="square" style="width:18px; margin-right:10px;"></i> TERMINATE
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Execution HUD -->
+            <div id="attack-section"
+                style="display:none; margin-top: 3rem; background:rgba(0,0,0,0.2); border-radius:12px; border:1px solid var(--glass-border); padding:2rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+                    <h3 style="letter-spacing:1px; font-size:0.9rem;">⚡ REAL-TIME MONITOR</h3>
+                    <div style="display:flex; align-items:center; gap:10px; font-size:0.75rem;">
+                        <span class="status-dot scanning"></span>
+                        <span id="scan-status" style="color:var(--clr-success);">SEQUENCING_DATA...</span>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:1.5rem;">
+                    <div class="stat-box">
+                        <span class="stat-val" id="packets-sent">0</span>
+                        <span class="stat-lab">Sent</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-val" id="match-count" style="color:var(--clr-success);">0</span>
+                        <span class="stat-lab">Matches</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-val" id="avg-time">0 ms</span>
+                        <span class="stat-lab">Latency</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-val" id="error-count" style="color:var(--clr-error);">0</span>
+                        <span class="stat-lab">Errors</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2.5rem;">
+                    <div id="packet-stream"
+                        style="height:40px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); border-radius:6px; position:relative; overflow:hidden;">
+                    </div>
+                </div>
+
+                <div class="live-log" style="height: 400px; margin-top: 1.5rem; display:flex; flex-direction:column;">
+                    <div class="log-header" style="justify-content:space-between; padding: 0.75rem 1.25rem;">
+                        <span class="log-title">TRAFFIC ANALYZER</span>
+                        <div style="display:flex; gap:0.5rem;">
+                            <select id="log-filter" class="input btn-sm"
+                                style="width:120px; font-size:0.7rem; height:26px; padding:0 8px;">
+                                <option value="all">ALL ENTRIES</option>
+                                <option value="match">MATCHES ONLY</option>
+                                <option value="error">ERRORS ONLY</option>
+                            </select>
+                            <button id="clear-log-btn" class="btn btn-ghost btn-sm">CLEAR</button>
+                        </div>
+                    </div>
+                    <div class="log-content" id="attack-log" style="flex:1;"></div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div id="results-section" class="results-section" style="display:none; margin-top: 3rem;">
+                <div class="results-header">
+                    <h3 class="results-title">► DISCOVERED FINDINGS</h3>
+                    <button id="export-pdf-btn" class="btn btn-success">Generate Report</button>
+                </div>
+                <div id="vulnerability-list" class="vulnerability-list"></div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <div id="response-modal" class="modal">
+        <div class="modal-content">
+            <div
+                style="padding:1rem 2rem; border-bottom:1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center;">
+                <h3 id="modal-title" style="font-size:0.9rem; color:var(--clr-accent);">REQUEST_DETAIL_VIEW</h3>
+                <button onclick="document.getElementById('response-modal').style.display='none'"
+                    class="btn btn-ghost btn-sm">CLOSE [ESC]</button>
+            </div>
+            <div style="flex:1; overflow:hidden; display:grid; grid-template-columns: 1fr 1fr; gap:0;">
+                <div style="padding:1.5rem; border-right:1px solid var(--glass-border); overflow-y:auto;">
+                    <div class="section-label" style="margin-top:0;">REQUEST DATA</div>
+                    <pre id="modal-request"
+                        style="font-family:var(--font-mono); font-size:0.8rem; color:#94a3b8; white-space:pre-wrap;"></pre>
+                </div>
+                <div style="padding:1.5rem; overflow-y:auto;">
+                    <div class="section-label" style="margin-top:0;">SERVER RESPONSE</div>
+                    <pre id="modal-response"
+                        style="font-family:var(--font-mono); font-size:0.8rem; color:var(--clr-success); white-space:pre-wrap;"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Seq Modal -->
+    <div id="preview-modal" class="modal">
+        <div class="modal-content" style="height:auto; max-width:800px; margin-top:10vh;">
+            <div style="padding:2rem;">
+                <h3 style="color:var(--clr-accent); margin-bottom:1.5rem;">ATTACK SEQUENCE PREVIEW</h3>
+                <div id="preview-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+                <button onclick="document.getElementById('preview-modal').style.display='none'" class="btn btn-primary"
+                    style="margin-top:2rem; width:100%;">VALIDATED</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logic Script -->
+    <script src="../js/pdf-report.js"></script>
+    <script src="../js/scanner-utils.js"></script>
+    <script src="../js/scanner-nav.js"></script>
+    <script>
+        class BruteForceNexus {
+            constructor() {
+                this.fileMap = new Map(); // For local files
+                this.serverFileCache = new Map(); // For server file paths
+                this.treeData = {};
+                this.selectedFile = null;
+                this.sourceType = 'server'; // 'server' or 'local'
+                this.payloads = [];
+                this.isScanning = false;
+                this.history = [];
+                this.stats = { sent: 0, matches: 0, errors: 0, totalTime: 0 };
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.loadServerDirectory(''); // Automatically load project SecLists
+                lucide.createIcons();
+            }
+
+            setupEventListeners() {
+                // Folder Selection (Local)
+                document.getElementById('folder-picker').addEventListener('change', (e) => this.handleLocalFolderSelection(e));
+
+                // Config Buttons
+                document.getElementById('insert-payload-btn').addEventListener('click', () => this.insertPayloadMarker());
+                document.getElementById('preview-payload-btn').addEventListener('click', () => this.showPreview());
+                document.getElementById('start-scan-btn').addEventListener('click', () => this.startAttack());
+                document.getElementById('stop-scan-btn').addEventListener('click', () => this.stopAttack());
+                document.getElementById('clear-log-btn').addEventListener('click', () => {
+                    document.getElementById('attack-log').innerHTML = '';
+                    this.history = [];
+                });
+                document.getElementById('log-filter').addEventListener('change', () => this.applyFilters());
+                document.getElementById('export-pdf-btn').addEventListener('click', () => this.exportPDF());
+
+                // Keyboard
+                window.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+                    }
+                });
+            }
+
+            /**
+             * AUTOMATIC SERVER-SIDE DIRECTORY LOADING
+             */
+            async loadServerDirectory(path) {
+                const treeContainer = document.getElementById('tree-container');
+                if (path === '') treeContainer.innerHTML = '<div style="padding:1rem; opacity:0.5;">Initializing Project SecLists...</div>';
+
+                try {
+                    const response = await fetch(`/api/seclists/ls?path=${encodeURIComponent(path)}`);
+                    const data = await response.json();
+
+                    if (path === '') {
+                        treeContainer.innerHTML = '';
+                        document.getElementById('file-count-label').textContent = `PROJECT SECLISTS LOADED`;
+                        this.sourceType = 'server';
+                    }
+
+                    this.renderServerItems(data, treeContainer, path);
+                    lucide.createIcons();
+                } catch (err) {
+                    treeContainer.innerHTML = `<div style="color:var(--clr-error); padding:1rem; font-size:0.75rem;">
+                        API Error: ${err.message}<br>Restart server (npm run dev) to fix.
+                    </div>`;
+                }
+            }
+
+            renderServerItems(items, container, parentPath) {
+                items.forEach(item => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'tree-node';
+
+                    const el = document.createElement('div');
+                    el.className = 'tree-item';
+                    el.innerHTML = item.isDir
+                        ? `<i data-lucide="chevron-right" class="folder-icon"></i> <i data-lucide="folder" class="folder-icon"></i> <span>${item.name}</span>`
+                        : `<i data-lucide="file-text" class="file-icon"></i> <span>${item.name}</span>`;
+
+                    if (item.isDir) {
+                        const sub = document.createElement('div');
+                        sub.style.display = 'none';
+                        el.onclick = (e) => {
+                            e.stopPropagation();
+                            const isExpanded = sub.style.display !== 'none';
+                            sub.style.display = isExpanded ? 'none' : 'block';
+                            if (!isExpanded && sub.innerHTML === '') {
+                                this.loadServerDirectory(item.path);
+                            }
+                            el.querySelector('[data-lucide^="chevron"]').outerHTML =
+                                isExpanded ? `<i data-lucide="chevron-right" class="folder-icon"></i>` : `<i data-lucide="chevron-down" class="folder-icon"></i>`;
+                            lucide.createIcons();
+                        };
+                        wrapper.appendChild(el);
+                        wrapper.appendChild(sub);
+                        // Store the target container to append children later
+                        item.container = sub;
+                    } else {
+                        el.onclick = (e) => {
+                            e.stopPropagation();
+                            document.querySelectorAll('.tree-item').forEach(x => x.classList.remove('active'));
+                            el.classList.add('active');
+                            this.loadServerFile(item.path, item.name);
+                        };
+                        wrapper.appendChild(el);
+                    }
+                    container.appendChild(wrapper);
+                });
+            }
+
+            async loadServerFile(path, name) {
+                this.sourceType = 'server';
+                this.selectedFile = { name: name, path: path }; // Dummy object for consistency
+                document.getElementById('active-file-info').style.display = 'flex';
+                document.getElementById('active-filename').textContent = name;
+
+                try {
+                    const res = await fetch(`/api/seclists/cat?path=${encodeURIComponent(path)}`);
+                    const content = await res.text();
+                    this.payloads = content.split('\n').map(l => l.trim()).filter(l => l);
+                    document.getElementById('active-line-count').textContent = this.payloads.length.toLocaleString() + ' (Server-side)';
+                } catch (err) {
+                    alert('Error reading server file.');
+                }
+            }
+
+            /**
+             * LOCAL FOLDER MOUNTING (REMAINS AVAILABLE)
+             */
+            async handleLocalFolderSelection(e) {
+                const files = e.target.files;
+                if (files.length === 0) return;
+
+                const treeContainer = document.getElementById('tree-container');
+                treeContainer.innerHTML = '<div style="padding:2rem; text-align:center;">Mounting Local Storage...</div>';
+
+                this.fileMap.clear();
+                this.treeData = {};
+                let totalSize = 0;
+
+                for (let file of files) {
+                    const pathParts = file.webkitRelativePath.split('/');
+                    totalSize += file.size;
+
+                    let currentLevel = this.treeData;
+                    pathParts.forEach((part, index) => {
+                        if (!currentLevel[part]) {
+                            currentLevel[part] = (index === pathParts.length - 1) ? null : {};
+                        }
+                        currentLevel = currentLevel[part];
+                    });
+                    this.fileMap.set(file.webkitRelativePath, file);
+                }
+
+                document.getElementById('hud-mem').textContent = (totalSize / 1024 / 1024).toFixed(2) + ' MB';
+                document.getElementById('file-count-label').textContent = `LOCAL WORDLISTS MOUNTED`;
+                this.sourceType = 'local';
+
+                treeContainer.innerHTML = '';
+                this.renderLocalTree(this.treeData, treeContainer, "");
+                lucide.createIcons();
+            }
+
+            renderLocalTree(obj, container, currentPath) {
+                const sortedKeys = Object.keys(obj).sort((a, b) => {
+                    const aIsDir = obj[a] !== null; const bIsDir = obj[b] !== null;
+                    return bIsDir - aIsDir || a.localeCompare(b);
+                });
+
+                sortedKeys.forEach(key => {
+                    const isDir = obj[key] !== null;
+                    const fullPath = currentPath ? `${currentPath}/${key}` : key;
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'tree-node';
+                    const item = document.createElement('div');
+                    item.className = 'tree-item';
+                    item.innerHTML = isDir
+                        ? `<i data-lucide="chevron-right" class="folder-icon"></i> <i data-lucide="folder" class="folder-icon"></i> <span>${key}</span>`
+                        : `<i data-lucide="file-text" class="file-icon"></i> <span>${key}</span>`;
+
+                    if (isDir) {
+                        const sub = document.createElement('div'); sub.style.display = 'none';
+                        item.onclick = (e) => {
+                            e.stopPropagation();
+                            const isExpanded = sub.style.display !== 'none';
+                            sub.style.display = isExpanded ? 'none' : 'block';
+                            item.querySelector('[data-lucide^="chevron"]').outerHTML =
+                                isExpanded ? `<i data-lucide="chevron-right" class="folder-icon"></i>` : `<i data-lucide="chevron-down" class="folder-icon"></i>`;
+                            lucide.createIcons();
+                        };
+                        wrapper.appendChild(item); wrapper.appendChild(sub);
+                        this.renderLocalTree(obj[key], sub, fullPath);
+                    } else {
+                        item.onclick = (e) => {
+                            e.stopPropagation();
+                            document.querySelectorAll('.tree-item').forEach(el => el.classList.remove('active'));
+                            item.classList.add('active');
+                            this.loadLocalFile(fullPath);
+                        };
+                        wrapper.appendChild(item);
+                    }
+                    container.appendChild(wrapper);
+                });
+            }
+
+            async loadLocalFile(path) {
+                const file = this.fileMap.get(path);
+                if (!file) return;
+                this.sourceType = 'local';
+                this.selectedFile = file;
+                document.getElementById('active-file-info').style.display = 'flex';
+                document.getElementById('active-filename').textContent = file.name;
+                try {
+                    const content = await file.text();
+                    this.payloads = content.split('\n').map(l => l.trim()).filter(l => l);
+                    document.getElementById('active-line-count').textContent = this.payloads.length.toLocaleString() + ' (Local-drive)';
+                } catch (err) { alert('Reader Error.'); }
+            }
+
+            insertPayloadMarker() {
+                const textarea = document.getElementById('request-input');
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                textarea.value = textarea.value.substring(0, start) + '§payload§' + textarea.value.substring(end);
+                textarea.focus(); textarea.selectionStart = textarea.selectionEnd = start + 9;
+            }
+
+            showPreview() {
+                const input = document.getElementById('request-input').value.trim();
+                if (!this.selectedFile || !input) return alert('Select wordlist and enter template.');
+                const list = document.getElementById('preview-list'); list.innerHTML = '';
+                this.payloads.slice(0, 5).forEach((p, i) => {
+                    const div = document.createElement('div');
+                    div.style.cssText = 'background:rgba(0,0,0,0.3); padding:1rem; border-radius:8px; border-left:3px solid var(--clr-accent); font-family:var(--font-mono); font-size:0.75rem;';
+                    div.innerHTML = `<div style="color:var(--clr-accent); margin-bottom:5px;">SEQUENCE #${i + 1} [Payload: ${p}]</div>
+                                     <div style="color:#94a3b8; word-break:break-all;">${input.replace(/§payload§/g, p)}</div>`;
+                    list.appendChild(div);
+                });
+                document.getElementById('preview-modal').style.display = 'block';
+            }
+
+            async startAttack() {
+                const input = document.getElementById('request-input').value.trim();
+                if (!input || this.payloads.length === 0) return alert('Wordlist and Target required.');
+                this.isScanning = true; this.results = []; this.history = []; this.stats = { sent: 0, matches: 0, errors: 0, totalTime: 0 };
+                document.getElementById('attack-section').style.display = 'block';
+                document.getElementById('start-scan-btn').style.display = 'none';
+                document.getElementById('stop-scan-btn').style.display = 'inline-flex';
+                document.getElementById('results-section').style.display = 'none';
+                document.getElementById('attack-log').innerHTML = '';
+                const delay = parseInt(document.getElementById('thread-delay').value);
+                const successRegex = document.getElementById('success-regex').value.trim();
+                const regex = successRegex ? new RegExp(successRegex, 'i') : null;
+                for (let i = 0; i < this.payloads.length; i++) {
+                    if (!this.isScanning) break;
+                    const payload = this.payloads[i];
+                    const fullRequest = input.replace(/§payload§/g, payload);
+                    await this.executeProbe(fullRequest, payload, regex);
+                    if (delay > 0) await new Promise(r => setTimeout(r, delay));
+                }
+                this.completeAttack();
+            }
+
+            async executeProbe(req, payload, regex) {
+                const start = Date.now(); this.createPacket('outbound'); const historyId = this.history.length;
+                try {
+                    const isUrl = req.startsWith('http');
+                    const config = isUrl ? { url: req, method: 'GET' } : this.parseRaw(req);
+                    const response = await fetch(config.url, { method: config.method, headers: config.headers || {} });
+                    const text = await response.text(); const ms = Date.now() - start;
+                    this.createPacket(response.ok ? 'inbound-success' : 'inbound-error');
+                    const isMatch = regex ? regex.test(text) : response.ok;
+                    this.stats.sent++; this.stats.totalTime += ms;
+                    this.history.push({ id: historyId, payload, request: req, response: `HTTP/1.1 ${response.status}\n` + [...response.headers].map(h => h.join(': ')).join('\n') + '\n\n' + text, status: response.status, isMatch });
+                    if (isMatch) {
+                        this.stats.matches++;
+                        this.results.push({ name: 'Brute Force Match', severity: 'HIGH', payload, path: config.url, evidence: `Status: ${response.status}`, impact: ['Account Takeover'], remediation: 'Rate limiting.' });
+                        this.log(`MATCH found: ${payload} (${response.status})`, 'success', historyId);
+                    } else { this.log(`Probe: ${payload} -> ${response.status}`, 'info', historyId); }
+                } catch (err) { this.stats.errors++; this.log(`Error [${payload}]: ${err.message}`, 'error'); }
+                this.updateStats();
+            }
+
+            parseRaw(raw) {
+                const lines = raw.split('\n'); const [method, path] = lines[0].split(' ');
+                const headers = {}; let host = '';
+                for (let i = 1; i < lines.length; i++) {
+                    const l = lines[i].trim(); if (!l) break;
+                    const [k, v] = l.split(': '); headers[k] = v;
+                    if (k.toLowerCase() === 'host') host = v;
+                }
+                const proto = (host.includes('localhost') || host.includes('127.0.0.1')) ? 'http' : 'https';
+                return { url: `${proto}://${host}${path}`, method, headers };
+            }
+
+            log(msg, type, id) {
+                const log = document.getElementById('attack-log'); const div = document.createElement('div');
+                div.className = `log-entry ${type} ${type === 'success' ? 'log-match' : ''}`;
+                div.innerHTML = `<span>[${new Date().toLocaleTimeString()}] ${msg}</span><span class="inspect-hint">INSPECT_HUD</span>`;
+                if (id !== undefined) div.onclick = () => this.showInspector(id);
+                log.appendChild(div); log.scrollTop = log.scrollHeight;
+            }
+
+            showInspector(id) {
+                const item = this.history[id];
+                document.getElementById('modal-title').textContent = `INSPECTOR // PAYLOAD: ${item.payload}`;
+                document.getElementById('modal-request').textContent = item.request;
+                document.getElementById('modal-response').textContent = item.response;
+                document.getElementById('response-modal').style.display = 'block';
+            }
+
+            createPacket(type) {
+                const s = document.getElementById('packet-stream'); const p = document.createElement('div');
+                const c = { outbound: '#3b82f6', 'inbound-success': '#10b981', 'inbound-error': '#ef4444' };
+                p.style.cssText = `width:6px; height:6px; background:${c[type]}; border-radius:1px; position:absolute; left:${type === 'outbound' ? '0' : '100%'}; top:17px; transition:0.5s ease-in-out;`;
+                s.appendChild(p); setTimeout(() => { p.style.left = type === 'outbound' ? '100%' : '0'; setTimeout(() => p.remove(), 500); }, 10);
+            }
+
+            updateStats() {
+                document.getElementById('packets-sent').textContent = this.stats.sent;
+                document.getElementById('match-count').textContent = this.stats.matches;
+                document.getElementById('error-count').textContent = this.stats.errors;
+                if (this.stats.sent > 0) document.getElementById('avg-time').textContent = Math.round(this.stats.totalTime / this.stats.sent) + ' ms';
+            }
+
+            stopAttack() { this.isScanning = false; }
+            completeAttack() {
+                this.isScanning = false;
+                document.getElementById('start-scan-btn').style.display = 'inline-block';
+                document.getElementById('stop-scan-btn').style.display = 'none';
+                if (this.results.length > 0) {
+                    document.getElementById('results-section').style.display = 'block';
+                    CyberSecResultsRenderer.render('#vulnerability-list', this.results);
+                }
+            }
+            async exportPDF() {
+                const report = new CyberSecPDFReport({ title: 'BRUTE FORCE', scannerName: 'Nexus', targetUrl: 'HybridWordlist', vulnerabilities: this.results });
+                await report.generate();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { new BruteForceNexus().init(); });
+    </script>
+</body>
+
+</html>

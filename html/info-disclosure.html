@@ -1,0 +1,278 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec System | Advanced Security HUD</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/info-disclosure-styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" />
+                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" />
+                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" />
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">SQLi</a>
+                <a href="xss.html" class="nav-link">XSS</a>
+                <a href="ssrf.html" class="nav-link">SSRF</a>
+                <a href="ssti.html" class="nav-link">SSTI</a>
+                <a href="authentication.html" class="nav-link">Auth</a>
+                <a href="cache-poisoning.html" class="nav-link">Cache</a>
+                <a href="deserialization.html" class="nav-link">Deserialize</a>
+                <a href="info-disclosure.html" class="nav-link active">Info Leak</a>
+            </div>
+            <div class="nav-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">Tests:</span>
+                    <span class="stat-value" id="total-tests">60+</span>
+                </div>
+                <div class="stat-badge">
+                    <span class="stat-label">Found:</span>
+                    <span class="stat-value" id="vuln-badge">0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title glass-title glass-title">
+                <span class="glowing-text">Information Disclosure</span> Scanner
+            </h1>
+            <p class="hero-subtitle">
+                Automated detection of error messages, debug endpoints, backup files, and sensitive data exposure
+            </p>
+        </div>
+    </section>
+
+    <main class="main-content">
+        <section class="scanner-section">
+            <div class="container">
+                <div class="config-card">
+                    <div class="card-header">
+                        <h2 class="card-title">► Target Configuration</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="config-grid">
+                            <div class="form-group">
+                                <label for="target-url">Target URL</label>
+                                <input type="url" id="target-url" class="input"
+                                    placeholder="https://lab-id.web-security-academy.net/" value="">
+                            </div>
+                            <div class="form-group">
+                                <label for="test-param">Test Parameter (for errors)</label>
+                                <input type="text" id="test-param" class="input" placeholder="id, productId, user"
+                                    value="productId">
+                            </div>
+                        </div>
+
+                        <div class="attack-types">
+                            <label class="section-label">Information Disclosure Tests</label>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-card">
+                                    <input type="checkbox" id="test-errors" checked>
+                                    <div class="checkbox-content">
+                                        <span class="checkbox-title">Error Messages</span>
+                                        <span class="checkbox-desc">Stack traces, debug info</span>
+                                    </div>
+                                </label>
+                                <label class="checkbox-card">
+                                    <input type="checkbox" id="test-files" checked>
+                                    <div class="checkbox-content">
+                                        <span class="checkbox-title">Sensitive Files</span>
+                                        <span class="checkbox-desc">Config, env, git files</span>
+                                    </div>
+                                </label>
+                                <label class="checkbox-card">
+                                    <input type="checkbox" id="test-backup" checked>
+                                    <div class="checkbox-content">
+                                        <span class="checkbox-title">Backup Files</span>
+                                        <span class="checkbox-desc">.bak, .old, .swp files</span>
+                                    </div>
+                                </label>
+                                <label class="checkbox-card">
+                                    <input type="checkbox" id="test-debug" checked>
+                                    <div class="checkbox-content">
+                                        <span class="checkbox-title">Debug Endpoints</span>
+                                        <span class="checkbox-desc">Debug params, trace</span>
+                                    </div>
+                                </label>
+                                <label class="checkbox-card">
+                                    <input type="checkbox" id="test-headers" checked>
+                                    <div class="checkbox-content">
+                                        <span class="checkbox-title">Response Headers</span>
+                                        <span class="checkbox-desc">Server, X-Powered-By</span>
+                                    </div>
+                                </label>
+                                <label class="checkbox-card">
+                                    <input type="checkbox" id="test-vcs" checked>
+                                    <div class="checkbox-content">
+                                        <span class="checkbox-title">Version Control</span>
+                                        <span class="checkbox-desc">.git, .svn exposure</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="scan-controls">
+                            <button id="start-scan-btn" class="btn btn-primary btn-lg">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none">
+                                    <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor"
+                                        stroke-width="2" />
+                                </svg>
+                                Start Info Disclosure Scan
+                            </button>
+                            <button id="stop-scan-btn" class="btn btn-danger btn-lg" style="display:none;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" style="margin-right:8px;">
+                                    <rect x="6" y="6" width="12" height="12" rx="2" />
+                                </svg>
+                                Terminate Scan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Attack -->
+                <div id="attack-section" class="attack-viz" style="display:none;">
+                    <div class="viz-header">
+                        <h3 class="viz-title">⚡ Live Information Discovery</h3>
+                        <div class="viz-status">
+                            <span class="status-dot scanning"></span>
+                            <span id="scan-status">Scanning...</span>
+                        </div>
+                    </div>
+
+                    <div class="progress-container">
+                        <div class="progress-info">
+                            <span id="progress-text">Initializing...</span>
+                            <span id="progress-percent">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                        <div class="progress-stats">
+                            <span>Tested: <strong id="tested-count">0</strong></span>
+                            <span>Found: <strong id="vuln-count">0</strong></span>
+                            <span>Critical: <strong id="critical-count">0</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="current-payload">
+                        <div class="payload-header">
+                            <span class="payload-label">Current Test:</span>
+                            <span class="payload-type-badge" id="current-type">Files</span>
+                        </div>
+                        <pre id="current-test-details" class="payload-path"></pre>
+                    </div>
+
+                    <div class="live-log">
+                        <div class="log-header">
+                            <span class="log-title">📋 Discovery Log</span>
+                            <button id="clear-log-btn" class="btn btn-ghost btn-sm">Clear</button>
+                        </div>
+                        <div class="log-content" id="attack-log"></div>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div id="results-section" class="results-section" style="display:none;">
+                    <div class="results-header">
+                        <h3 class="results-title">► Information Leaks Found</h3>
+                        <div class="results-actions">
+                            <button id="export-pdf-btn" class="btn btn-success btn-lg">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" style="margin-right:8px;">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                    <path d="M14 2v6h6" />
+                                    <path d="M12 18v-6" />
+                                    <path d="M9 15l3 3 3-3" />
+                                </svg>
+                                Export PDF Report
+                            </button>
+                        </div>
+                    </div>
+                    <div id="vulnerability-list" class="vulnerability-list"></div>
+                </div>
+
+                <!-- Guide -->
+                <div class="config-card" style="margin-top: 2rem;">
+                    <div class="card-header">
+                        <h2 class="card-title">📚 Information Disclosure Techniques</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="technique-grid">
+                            <div class="technique-item">
+                                <h4>🔴 Error Message Disclosure</h4>
+                                <p>Verbose error messages reveal internals</p>
+                                <pre class="technique-code"># Trigger errors with invalid input
+?productId='
+?id=999999
+?file=../../../etc/passwd
+
+# Look for stack traces, SQL errors</pre>
+                            </div>
+                            <div class="technique-item">
+                                <h4>🔴 Debug Endpoints</h4>
+                                <p>Development endpoints left enabled</p>
+                                <pre class="technique-code"># Common debug endpoints
+/debug
+/trace
+/actuator/env
+/phpinfo.php
+?debug=true</pre>
+                            </div>
+                            <div class="technique-item">
+                                <h4>🟡 Backup File Exposure</h4>
+                                <p>Source code via backup files</p>
+                                <pre class="technique-code"># Check for backup extensions
+/index.php.bak
+/config.py~
+/app.js.old
+/.env.backup</pre>
+                            </div>
+                            <div class="technique-item">
+                                <h4>🟡 Version Control Exposure</h4>
+                                <p>Git/SVN repositories exposed</p>
+                                <pre class="technique-code"># Check version control
+/.git/config
+/.git/HEAD
+/.svn/entries
+/.hg/</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>⚠️ For educational purposes only. Use on authorized labs only.</p>
+    </footer>
+
+    <script type="module" src="../js/firebase-config.js"></script>
+    <script src="../js/info-disclosure-payloads.js"></script>
+    <script src="../js/info-disclosure-scanner.js"></script>
+        <script src="../js/pdf-report.js"></script>
+    <script src="../js/scanner-utils.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script src="../js/scanner-nav.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

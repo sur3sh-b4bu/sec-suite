@@ -1,0 +1,249 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCP Metadata & SSRF Scanner | CyberSec Suite</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/firebase-gcp-styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div class="hud-decoration hud-top-left" style="background: linear-gradient(135deg, #ef4444, #f59e0b);"></div>
+    <div class="hud-decoration hud-bottom-right"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu"></div>
+            <div class="nav-stats">
+                <div class="stat-badge"><span class="stat-label">Scanner:</span><span class="stat-value"
+                        id="scanner-status">READY</span></div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <section class="hero-section">
+            <div class="hero-badge"
+                style="background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #ef4444;">
+                <i data-lucide="server-crash"></i>
+                <span>GCP Metadata & SSRF</span>
+            </div>
+            <h1 class="hero-title"><span class="glowing-text">Metadata</span> SSRF Scanner</h1>
+            <p class="hero-subtitle">Detect SSRF sinks that could expose GCP metadata service, service account tokens,
+                and internal infrastructure.</p>
+        </section>
+
+        <section class="container">
+            <div class="stats-overview">
+                <div class="stat-box">
+                    <div class="stat-number" id="total-modules">10</div>
+                    <div class="stat-label">Attack Vectors</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="total-checks">0</div>
+                    <div class="stat-label">Tests Run</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="vulns-found">0</div>
+                    <div class="stat-label">SSRF Sinks</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="scan-time">0s</div>
+                    <div class="stat-label">Duration</div>
+                </div>
+            </div>
+
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">SSRF Target Configuration</h2>
+                </div>
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="target-url">Target URL with URL Parameter</label>
+                        <input type="url" id="target-url" class="input"
+                            placeholder="https://app.example.com/fetch?url=">
+                    </div>
+                    <div class="form-group">
+                        <label for="param-name">URL Parameter Name</label>
+                        <input type="text" id="param-name" class="input"
+                            placeholder="url, link, redirect, callback, etc.">
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label for="additional-endpoints">Additional Endpoints to Test (one per line)</label>
+                        <textarea id="additional-endpoints" class="input" rows="3" placeholder="/api/fetch?resource=
+/proxy?target=
+/image?src="></textarea>
+                    </div>
+                </div>
+
+                <div class="section-label">GCP Metadata SSRF Vectors</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-metadata-v1" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Metadata Service v1</span>
+                            <span class="checkbox-desc">Detect access to 169.254.169.254</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-metadata-internal" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Internal Metadata Hostname</span>
+                            <span class="checkbox-desc">Test metadata.google.internal access</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-sa-token" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Service Account Token</span>
+                            <span class="checkbox-desc">Check for access token exposure</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-project-info" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Project Info Leak</span>
+                            <span class="checkbox-desc">Detect project-id, zone, instance-id exposure</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-ssh-keys" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">SSH Keys Exposure</span>
+                            <span class="checkbox-desc">Check for authorized SSH keys leak</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-kube-env" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Kubernetes Attributes</span>
+                            <span class="checkbox-desc">Detect GKE cluster metadata</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-header-bypass" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Header Bypass</span>
+                            <span class="checkbox-desc">Test metadata header (Metadata-Flavor) bypass</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-protocol-smuggle" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Protocol Smuggling</span>
+                            <span class="checkbox-desc">Test gopher://, dict://, file:// schemes</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-dns-rebind">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">DNS Rebinding</span>
+                            <span class="checkbox-desc">Check for DNS rebinding vulnerability</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-redirect-chain">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Redirect Chain</span>
+                            <span class="checkbox-desc">Follow redirects to metadata service</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button class="btn btn-primary btn-lg" id="start-scan-btn"><i data-lucide="play"></i>Start SSRF
+                        Scan</button>
+                    <button class="btn btn-danger btn-lg" id="stop-scan-btn" style="display:none;"><i
+                            data-lucide="square"></i>Stop</button>
+                </div>
+            </div>
+
+            <div class="attack-viz" id="attack-section" style="display:none;">
+                <div class="card-header" style="border-color:#ef4444;">
+                    <h2 class="card-title">Live SSRF Analysis</h2>
+                </div>
+                <div class="progress-container">
+                    <div style="display:flex;justify-content:space-between;"><span
+                            id="progress-text">Initializing...</span><span id="progress-percent">0%</span></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+                <div class="results-summary">
+                    <div class="summary-card success">
+                        <div class="summary-icon"><i data-lucide="check-circle"></i></div>
+                        <div class="summary-value" id="passed-count">0</div>
+                        <div class="summary-label">Blocked</div>
+                    </div>
+                    <div class="summary-card warning">
+                        <div class="summary-icon"><i data-lucide="alert-triangle"></i></div>
+                        <div class="summary-value" id="warning-count">0</div>
+                        <div class="summary-label">Partial</div>
+                    </div>
+                    <div class="summary-card danger">
+                        <div class="summary-icon"><i data-lucide="shield-alert"></i></div>
+                        <div class="summary-value" id="vuln-count">0</div>
+                        <div class="summary-label">Exploitable</div>
+                    </div>
+                    <div class="summary-card info">
+                        <div class="summary-icon"><i data-lucide="info"></i></div>
+                        <div class="summary-value" id="info-count">0</div>
+                        <div class="summary-label">Info</div>
+                    </div>
+                </div>
+                <div class="live-log">
+                    <div class="log-header"><span><span class="status-dot scanning"></span>SSRF Security
+                            Log</span><button class="log-btn" id="clear-log-btn">Clear</button></div>
+                    <div class="log-content" id="attack-log">
+                        <div class="log-entry info">[System] GCP Metadata SSRF Scanner ready</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section" id="results-section" style="display:none;">
+                <div class="card-header" style="border-color:#ef4444;">
+                    <h2 class="card-title">SSRF Vulnerabilities</h2>
+                </div>
+                <div id="vulnerability-list"></div>
+            </div>
+
+            <!-- Info Section -->
+            <div class="config-card">
+                <div class="card-header" style="border-color: var(--clr-warning);">
+                    <h2 class="card-title">⚠️ Important Notes</h2>
+                </div>
+                <div class="technique-grid">
+                    <div class="technique-item">
+                        <h4>Ethical Testing Only</h4>
+                        <p>This scanner detects SSRF sinks but does NOT actually exploit them to access metadata. It
+                            only confirms the presence of URL fetch behavior.</p>
+                    </div>
+                    <div class="technique-item">
+                        <h4>GCP Metadata Paths</h4>
+                        <p><code>/computeMetadata/v1/instance/service-accounts/default/token</code> - Access token<br>
+                            <code>/computeMetadata/v1/project/project-id</code> - Project ID
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | GCP Metadata SSRF Scanner v1.0</p>
+    </footer>
+    <script src="../js/scanner-nav.js"></script>
+    <script src="../js/gcp-metadata-scanner.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

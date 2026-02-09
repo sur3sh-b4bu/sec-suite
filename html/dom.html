@@ -1,0 +1,331 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec Suite | DOM Vulnerability Auditor</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu">
+                <!-- Injected by scanner-nav.js -->
+            </div>
+            <div class="nav-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">Sources:</span>
+                    <span class="stat-value" id="total-sources">20+</span>
+                </div>
+                <div class="stat-badge">
+                    <span class="stat-label">Sinks:</span>
+                    <span class="stat-value" id="total-sinks">25+</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <h1 class="hero-title">
+            <span class="glowing-text">DOM</span> Integrity Auditor
+        </h1>
+        <p class="hero-subtitle">
+            Advanced client-side discovery engine. Automated source-to-sink tracking for DOM XSS, open redirects, and
+            storage poisoning.
+        </p>
+    </section>
+
+    <main class="main-content">
+        <section class="container">
+
+            <!-- 1. DOM Configuration Matrix -->
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">► Client Environment</h2>
+                </div>
+
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="target-url">Target Page URL</label>
+                        <input type="url" id="target-url" class="input"
+                            placeholder="https://app.system.com/search?q=query">
+                    </div>
+                    <div class="form-group">
+                        <label for="test-mode">Audit Precision</label>
+                        <select id="test-mode" class="input">
+                            <option value="auto">AUTONOMOUS DISCOVERY</option>
+                            <option value="manual">TARGETED SOURCE/SINK</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="section-label">Source Matrix (Inbound Trajectories)</div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="source-url" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">document.URL</span>
+                            <code>location.href</code>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="source-hash" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">location.hash</span>
+                            <code>#fragment_data</code>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="source-search" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">location.search</span>
+                            <code>?query_params</code>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="source-referrer" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">document.referrer</span>
+                            <code>origin_tracking</code>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="source-cookie" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">document.cookie</span>
+                            <code>persistence_node</code>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="source-postmessage" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">postMessage</span>
+                            <code>cross_window_data</code>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="section-label">Sink Matrix (Dangerous Terminals)</div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="sink-innerhtml" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">innerHTML</span>
+                            <span class="checkbox-desc">Audit for HTML injection vectors.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="sink-eval" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">eval()</span>
+                            <span class="checkbox-desc">Audit for client-side code execution.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="sink-location" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">location.assign</span>
+                            <span class="checkbox-desc">Audit for open redirect vulnerabilities.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="sink-document-write" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">document.write</span>
+                            <span class="checkbox-desc">Audit for legacy buffer overwrites.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="sink-settimeout" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">setTimeout</span>
+                            <span class="checkbox-desc">Audit for secondary data execution.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="sink-jquery" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Library Sinks</span>
+                            <span class="checkbox-desc">Audit jQuery .html() and .append().</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="section-label">Audit Target Profile</div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="vuln-dom-xss" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">DOM XSS</span>
+                            <span class="checkbox-desc">Audit for client-side HTML/script injection.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="vuln-open-redirect" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Open Redirect</span>
+                            <span class="checkbox-desc">Detect unsafe location manipulation.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="vuln-cookie-manip" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Cookie Audit</span>
+                            <span class="checkbox-desc">Track document.cookie trajectories.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="vuln-webstorage" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Storage Poisoning</span>
+                            <span class="checkbox-desc">Analyze local/sessionStorage sinks.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="vuln-ajax" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">AJAX/XHR Injection</span>
+                            <span class="checkbox-desc">Monitor asynchronous data fetch.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="vuln-websocket" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">WebSocket Data</span>
+                            <span class="checkbox-desc">Audit real-time duplex trajectories.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="scan-controls">
+                    <button id="start-scan-btn" class="btn btn-primary btn-lg">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" style="margin-right:10px;">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                        Initialize DOM Audit
+                    </button>
+                    <button id="stop-scan-btn" class="btn btn-danger" style="display:none;">Terminate Sequence</button>
+                </div>
+            </div>
+
+            <!-- 2. Execution HUD -->
+            <div id="analysis-section" class="attack-viz" style="display:none;">
+                <div class="viz-header">
+                    <h3 class="viz-title">⚡ REAL-TIME DOM FLOW HUD</h3>
+                    <div class="viz-status">
+                        <span class="status-dot scanning"></span>
+                        <span id="scan-status" style="color:var(--clr-success);">ACTIVE_AUDIT</span>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-info"
+                        style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.85rem;color:var(--clr-accent);">
+                        <span id="progress-text">READY</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-stats"
+                        style="display:grid;grid-template-columns:repeat(3, 1fr);text-align:center;">
+                        <div class="stat-item">
+                            <div class="stat-label">Sources Hooked</div>
+                            <div class="stat-number" id="sources-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Sinks Monitored</div>
+                            <div class="stat-number" id="sinks-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Vulnerabilities</div>
+                            <div class="stat-number" id="vuln-count" style="color:var(--clr-success);">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dataflow-viz"
+                    style="margin-top:2rem;background:rgba(255,255,255,0.05);padding:1.5rem;border-radius:12px;border:1px solid var(--glass-border);">
+                    <h4 style="font-size:0.8rem;text-transform:uppercase;color:var(--clr-accent);margin-bottom:1.5rem;">
+                        Trajectory Visualization</h4>
+                    <div id="dataflow-container" style="min-height:100px;display:flex;flex-direction:column;gap:1rem;">
+                        <div class="dataflow-placeholder"
+                            style="text-align:center;color:rgba(255,255,255,0.3);font-size:0.85rem;padding:2rem;">
+                            Hooking DOM events...</div>
+                    </div>
+                </div>
+
+                <div class="live-log">
+                    <div class="log-header">
+                        <span class="log-title">DOM EVENT LOG</span>
+                        <button id="clear-log-btn" class="btn btn-ghost btn-sm">Purge</button>
+                    </div>
+                    <div class="log-content" id="analysis-log"></div>
+                </div>
+            </div>
+
+            <!-- 3. Intelligence Evidence -->
+            <div id="results-section" class="results-section" style="display:none;">
+                <div class="results-header"
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3rem;">
+                    <h3 class="results-title">► BREACHED TRAJECTORIES</h3>
+                    <button id="export-report-btn" class="btn btn-success" style="padding:1rem 2rem;">EXPORT
+                        INTEL</button>
+                </div>
+                <div id="vulnerability-list" class="vulnerability-list"></div>
+            </div>
+
+            <!-- 4. Research Matrix -->
+            <div class="section-label">DOM Vulnerability Index</div>
+            <div class="technique-grid">
+                <div class="technique-item">
+                    <h4>🔴 DOM XSS</h4>
+                    <p>Occurs when an application contains client-side JavaScript that processes data from an untrusted
+                        source in an unsafe way, usually by writing the data back to the DOM.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🔴 Open Redirect (DOM)</h4>
+                    <p>Triggered when data from a source is used to modify the <code>location</code> property of the
+                        current window, allowing attackers to redirect users to malicious domains.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Web Storage Poisoning</h4>
+                    <p>Injecting malicious data into <code>localStorage</code> or <code>sessionStorage</code> that is
+                        later read and processed by a dangerous sink.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 client-side SQLi</h4>
+                    <p>Occurs when an application uses a client-side database (like Web SQL) and incorporates untrusted
+                        data into a query in an unsafe way.</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | Educational DOM Module</p>
+    </footer>
+
+    <script type="module" src="../js/firebase-config.js"></script>
+    <script src="../js/dom-payloads.js"></script>
+    <script src="../js/dom-scanner.js"></script>
+    <script src="../js/scanner-nav.js"></script>
+        <script src="../js/pdf-report.js"></script>
+    <script src="../js/scanner-utils.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

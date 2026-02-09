@@ -1,0 +1,251 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCP Cloud Functions Scanner | CyberSec Suite</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/firebase-gcp-styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div class="hud-decoration hud-top-left" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);"></div>
+    <div class="hud-decoration hud-bottom-right"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu"></div>
+            <div class="nav-stats">
+                <div class="stat-badge"><span class="stat-label">Scanner:</span><span class="stat-value"
+                        id="scanner-status">READY</span></div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <section class="hero-section">
+            <div class="hero-badge"
+                style="background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3); color: #3b82f6;">
+                <i data-lucide="cloud-lightning"></i>
+                <span>GCP Cloud Functions</span>
+            </div>
+            <h1 class="hero-title"><span class="glowing-text">Cloud Functions</span> Scanner</h1>
+            <p class="hero-subtitle">Detect unauthenticated endpoints, parameter injection, and serverless function
+                vulnerabilities in GCP Cloud Functions.</p>
+        </section>
+
+        <section class="container">
+            <div class="stats-overview">
+                <div class="stat-box">
+                    <div class="stat-number" id="total-modules">12</div>
+                    <div class="stat-label">Attack Vectors</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="total-checks">0</div>
+                    <div class="stat-label">Tests Run</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="vulns-found">0</div>
+                    <div class="stat-label">Vulnerable</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="scan-time">0s</div>
+                    <div class="stat-label">Duration</div>
+                </div>
+            </div>
+
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">Cloud Functions Target</h2>
+                </div>
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="project-id">GCP Project ID</label>
+                        <input type="text" id="project-id" class="input" placeholder="my-gcp-project">
+                    </div>
+                    <div class="form-group">
+                        <label for="region">Cloud Function Region</label>
+                        <select id="region" class="input">
+                            <option value="us-central1">us-central1</option>
+                            <option value="us-east1">us-east1</option>
+                            <option value="us-west1">us-west1</option>
+                            <option value="europe-west1">europe-west1</option>
+                            <option value="asia-east1">asia-east1</option>
+                            <option value="asia-northeast1">asia-northeast1</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label for="function-urls">Function Endpoints (one per line)</label>
+                        <textarea id="function-urls" class="input" rows="4" placeholder="https://us-central1-project.cloudfunctions.net/api
+https://us-central1-project.cloudfunctions.net/webhook
+https://us-central1-project.cloudfunctions.net/processData"></textarea>
+                    </div>
+                </div>
+
+                <div class="section-label">Cloud Function Attack Vectors</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-noauth" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Unauthenticated Access</span>
+                            <span class="checkbox-desc">Test if function responds without authentication</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-iam-bypass" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">IAM Bypass</span>
+                            <span class="checkbox-desc">Check for allUsers or allAuthenticatedUsers access</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-param-inject" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Parameter Injection</span>
+                            <span class="checkbox-desc">Test for injection in function parameters</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-event-forge" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Event Data Forgery</span>
+                            <span class="checkbox-desc">Test for trusting event data without validation</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-env-leak" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Environment Leakage</span>
+                            <span class="checkbox-desc">Check for env vars in error messages</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-timeout" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Timeout Exhaustion</span>
+                            <span class="checkbox-desc">Detect denial via long-running requests</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-source-exposure" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Source Code Exposure</span>
+                            <span class="checkbox-desc">Check for exposed source via error traces</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-cold-start" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Cold Start Info Leak</span>
+                            <span class="checkbox-desc">Detect info leaked in cold start responses</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-cors-func">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">CORS Misconfiguration</span>
+                            <span class="checkbox-desc">Test for overly permissive CORS headers</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-method-override">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">HTTP Method Override</span>
+                            <span class="checkbox-desc">Bypass method restrictions via headers</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-gen2-metadata">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Gen2 Metadata Access</span>
+                            <span class="checkbox-desc">Check for metadata service access in Cloud Run</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-secret-manager">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Secret Manager Exposure</span>
+                            <span class="checkbox-desc">Detect secrets exposed in responses</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button class="btn btn-primary btn-lg" id="start-scan-btn"><i data-lucide="play"></i>Start Function
+                        Scan</button>
+                    <button class="btn btn-danger btn-lg" id="stop-scan-btn" style="display:none;"><i
+                            data-lucide="square"></i>Stop</button>
+                    <button class="btn" id="discover-btn"
+                        style="background: rgba(6,182,212,0.1); color: #06b6d4; border: 1px solid rgba(6,182,212,0.3);"><i
+                            data-lucide="radar"></i>Discover Functions</button>
+                </div>
+            </div>
+
+            <div class="attack-viz" id="attack-section" style="display:none;">
+                <div class="card-header" style="border-color:#3b82f6;">
+                    <h2 class="card-title">Live Function Analysis</h2>
+                </div>
+                <div class="progress-container">
+                    <div style="display:flex;justify-content:space-between;"><span
+                            id="progress-text">Initializing...</span><span id="progress-percent">0%</span></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+                <div class="results-summary">
+                    <div class="summary-card success">
+                        <div class="summary-icon"><i data-lucide="check-circle"></i></div>
+                        <div class="summary-value" id="passed-count">0</div>
+                        <div class="summary-label">Secure</div>
+                    </div>
+                    <div class="summary-card warning">
+                        <div class="summary-icon"><i data-lucide="alert-triangle"></i></div>
+                        <div class="summary-value" id="warning-count">0</div>
+                        <div class="summary-label">Warnings</div>
+                    </div>
+                    <div class="summary-card danger">
+                        <div class="summary-icon"><i data-lucide="shield-alert"></i></div>
+                        <div class="summary-value" id="vuln-count">0</div>
+                        <div class="summary-label">Critical</div>
+                    </div>
+                    <div class="summary-card info">
+                        <div class="summary-icon"><i data-lucide="info"></i></div>
+                        <div class="summary-value" id="info-count">0</div>
+                        <div class="summary-label">Info</div>
+                    </div>
+                </div>
+                <div class="live-log">
+                    <div class="log-header"><span><span class="status-dot scanning"></span>Function Security
+                            Log</span><button class="log-btn" id="clear-log-btn">Clear</button></div>
+                    <div class="log-content" id="attack-log">
+                        <div class="log-entry info">[System] GCP Cloud Functions Scanner ready</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section" id="results-section" style="display:none;">
+                <div class="card-header" style="border-color:#3b82f6;">
+                    <h2 class="card-title">Function Vulnerabilities</h2>
+                </div>
+                <div id="vulnerability-list"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | GCP Cloud Functions Scanner v1.0</p>
+    </footer>
+    <script src="../js/scanner-nav.js"></script>
+    <script src="../js/gcp-functions-scanner.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

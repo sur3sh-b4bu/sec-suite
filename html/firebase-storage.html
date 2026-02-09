@@ -1,0 +1,223 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Storage Scanner | CyberSec Suite</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/firebase-gcp-styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div class="hud-decoration hud-top-left" style="background: linear-gradient(135deg, #f59e0b, #ef4444);"></div>
+    <div class="hud-decoration hud-bottom-right"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu"></div>
+            <div class="nav-stats">
+                <div class="stat-badge"><span class="stat-label">Scanner:</span><span class="stat-value"
+                        id="scanner-status">READY</span></div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <section class="hero-section">
+            <div class="hero-badge"
+                style="background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3); color: #f59e0b;">
+                <i data-lucide="hard-drive"></i>
+                <span>Firebase Storage</span>
+            </div>
+            <h1 class="hero-title"><span class="glowing-text">Storage</span> Security Scanner</h1>
+            <p class="hero-subtitle">Detect misconfigured Firebase Storage rules, exposed files, and insecure
+                upload/download policies.</p>
+        </section>
+
+        <section class="container">
+            <div class="stats-overview">
+                <div class="stat-box">
+                    <div class="stat-number" id="total-modules">10</div>
+                    <div class="stat-label">Attack Vectors</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="total-checks">0</div>
+                    <div class="stat-label">Tests Run</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="vulns-found">0</div>
+                    <div class="stat-label">Exposed Files</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="scan-time">0s</div>
+                    <div class="stat-label">Duration</div>
+                </div>
+            </div>
+
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">Storage Target Configuration</h2>
+                </div>
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="storage-bucket">Storage Bucket</label>
+                        <input type="text" id="storage-bucket" class="input" placeholder="your-project.appspot.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="known-paths">Known File Paths (optional, one per line)</label>
+                        <textarea id="known-paths" class="input" rows="3" placeholder="/uploads/
+/images/
+/documents/"></textarea>
+                    </div>
+                </div>
+
+                <div class="section-label">Storage Attack Vectors</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-bucket-list" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Bucket Listing</span>
+                            <span class="checkbox-desc">Check if bucket contents can be listed without auth</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-public-download" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Public Download Access</span>
+                            <span class="checkbox-desc">Test for publicly downloadable files</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-unrestricted-upload" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Unrestricted Upload</span>
+                            <span class="checkbox-desc">Detect if anyone can upload files</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-mime-bypass" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">MIME Type Bypass</span>
+                            <span class="checkbox-desc">Test if dangerous file types can be uploaded</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-size-limit" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">File Size Limit Bypass</span>
+                            <span class="checkbox-desc">Check for missing size restrictions</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-path-traversal" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Path Traversal</span>
+                            <span class="checkbox-desc">Test for ../ path manipulation in storage</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-metadata-exposure" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Metadata Exposure</span>
+                            <span class="checkbox-desc">Detect if file metadata reveals sensitive info</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-download-token">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Download Token Prediction</span>
+                            <span class="checkbox-desc">Check for predictable download tokens</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-cors-storage">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">CORS Misconfiguration</span>
+                            <span class="checkbox-desc">Detect overly permissive CORS on storage</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-overwrite">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">File Overwrite</span>
+                            <span class="checkbox-desc">Test if existing files can be overwritten</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button class="btn btn-primary btn-lg" id="start-scan-btn"><i data-lucide="play"></i>Start Storage
+                        Scan</button>
+                    <button class="btn btn-danger btn-lg" id="stop-scan-btn" style="display:none;"><i
+                            data-lucide="square"></i>Stop</button>
+                </div>
+            </div>
+
+            <div class="attack-viz" id="attack-section" style="display:none;">
+                <div class="card-header" style="border-color:#f59e0b;">
+                    <h2 class="card-title">Live Storage Analysis</h2>
+                </div>
+                <div class="progress-container">
+                    <div style="display:flex;justify-content:space-between;"><span
+                            id="progress-text">Initializing...</span><span id="progress-percent">0%</span></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+                <div class="results-summary">
+                    <div class="summary-card success">
+                        <div class="summary-icon"><i data-lucide="check-circle"></i></div>
+                        <div class="summary-value" id="passed-count">0</div>
+                        <div class="summary-label">Secure</div>
+                    </div>
+                    <div class="summary-card warning">
+                        <div class="summary-icon"><i data-lucide="alert-triangle"></i></div>
+                        <div class="summary-value" id="warning-count">0</div>
+                        <div class="summary-label">Warnings</div>
+                    </div>
+                    <div class="summary-card danger">
+                        <div class="summary-icon"><i data-lucide="shield-alert"></i></div>
+                        <div class="summary-value" id="vuln-count">0</div>
+                        <div class="summary-label">Critical</div>
+                    </div>
+                    <div class="summary-card info">
+                        <div class="summary-icon"><i data-lucide="info"></i></div>
+                        <div class="summary-value" id="info-count">0</div>
+                        <div class="summary-label">Info</div>
+                    </div>
+                </div>
+                <div class="live-log">
+                    <div class="log-header"><span><span class="status-dot scanning"></span>Storage Security
+                            Log</span><button class="log-btn" id="clear-log-btn">Clear</button></div>
+                    <div class="log-content" id="attack-log">
+                        <div class="log-entry info">[System] Firebase Storage Scanner ready</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section" id="results-section" style="display:none;">
+                <div class="card-header" style="border-color:#f59e0b;">
+                    <h2 class="card-title">Storage Vulnerabilities</h2>
+                </div>
+                <div id="vulnerability-list"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | Firebase Storage Scanner v1.0</p>
+    </footer>
+    <script src="../js/scanner-nav.js"></script>
+    <script src="../js/firebase-storage-scanner.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

@@ -1,0 +1,238 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Authentication Scanner | CyberSec Suite</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/firebase-gcp-styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div class="hud-decoration hud-top-left"></div>
+    <div class="hud-decoration hud-bottom-right"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu"></div>
+            <div class="nav-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">Scanner:</span>
+                    <span class="stat-value" id="scanner-status">READY</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <section class="hero-section">
+            <div class="hero-badge"
+                style="background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #ef4444;">
+                <i data-lucide="user-x"></i>
+                <span>Firebase Authentication</span>
+            </div>
+            <h1 class="hero-title"><span class="glowing-text">Auth</span> Security Scanner</h1>
+            <p class="hero-subtitle">Detect authentication bypasses, session hijacking risks, and identity provider
+                misconfigurations in Firebase Auth implementations.</p>
+        </section>
+
+        <section class="container">
+            <div class="stats-overview">
+                <div class="stat-box">
+                    <div class="stat-number" id="total-modules">12</div>
+                    <div class="stat-label">Attack Vectors</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="total-checks">0</div>
+                    <div class="stat-label">Tests Run</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="vulns-found">0</div>
+                    <div class="stat-label">Vulnerabilities</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="scan-time">0s</div>
+                    <div class="stat-label">Duration</div>
+                </div>
+            </div>
+
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">Target Configuration</h2>
+                </div>
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="target-url">Firebase App URL</label>
+                        <input type="url" id="target-url" class="input" placeholder="https://your-app.firebaseapp.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="api-key">Firebase API Key (if known)</label>
+                        <input type="text" id="api-key" class="input" placeholder="AIzaSy...">
+                    </div>
+                </div>
+
+                <div class="section-label">Authentication Attack Vectors</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-anon-escalation" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Anonymous to Authenticated Escalation</span>
+                            <span class="checkbox-desc">Test if anonymous users can gain authenticated privileges</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-email-enum" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Email Enumeration</span>
+                            <span class="checkbox-desc">Detect if valid emails can be enumerated via error
+                                messages</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-weak-password" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Weak Password Policy</span>
+                            <span class="checkbox-desc">Check if weak passwords are accepted</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-token-leak" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">ID Token Exposure</span>
+                            <span class="checkbox-desc">Detect if ID tokens are leaked in logs/URLs</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-custom-token" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Custom Token Forgery</span>
+                            <span class="checkbox-desc">Test for weak custom token signing</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-session-fixation" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Session Fixation</span>
+                            <span class="checkbox-desc">Check for session fixation vulnerabilities</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-oauth-redirect" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">OAuth Redirect Bypass</span>
+                            <span class="checkbox-desc">Test for open redirect in OAuth flows</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-mfa-bypass" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">MFA Bypass Detection</span>
+                            <span class="checkbox-desc">Check if MFA can be skipped</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-phone-spoof">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Phone Auth Spoofing</span>
+                            <span class="checkbox-desc">Detect phone authentication weaknesses</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-link-injection">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Email Link Injection</span>
+                            <span class="checkbox-desc">Test email link auth for injection</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-provider-linking">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Provider Linking Abuse</span>
+                            <span class="checkbox-desc">Check for account takeover via provider linking</span>
+                        </div>
+                    </div>
+                    <div class="checkbox-card">
+                        <input type="checkbox" id="attack-token-refresh">
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Refresh Token Misuse</span>
+                            <span class="checkbox-desc">Detect insecure refresh token handling</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button class="btn btn-primary btn-lg" id="start-scan-btn"><i data-lucide="play"></i>Start Auth
+                        Scan</button>
+                    <button class="btn btn-danger btn-lg" id="stop-scan-btn" style="display:none;"><i
+                            data-lucide="square"></i>Stop</button>
+                </div>
+            </div>
+
+            <div class="attack-viz" id="attack-section" style="display:none;">
+                <div class="card-header" style="border-color:#ef4444;">
+                    <h2 class="card-title">Live Authentication Analysis</h2>
+                </div>
+                <div class="progress-container">
+                    <div style="display:flex;justify-content:space-between;"><span
+                            id="progress-text">Initializing...</span><span id="progress-percent">0%</span></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width:0%;"></div>
+                    </div>
+                </div>
+                <div class="results-summary">
+                    <div class="summary-card success">
+                        <div class="summary-icon"><i data-lucide="check-circle"></i></div>
+                        <div class="summary-value" id="passed-count">0</div>
+                        <div class="summary-label">Secure</div>
+                    </div>
+                    <div class="summary-card warning">
+                        <div class="summary-icon"><i data-lucide="alert-triangle"></i></div>
+                        <div class="summary-value" id="warning-count">0</div>
+                        <div class="summary-label">Warnings</div>
+                    </div>
+                    <div class="summary-card danger">
+                        <div class="summary-icon"><i data-lucide="shield-alert"></i></div>
+                        <div class="summary-value" id="vuln-count">0</div>
+                        <div class="summary-label">Critical</div>
+                    </div>
+                    <div class="summary-card info">
+                        <div class="summary-icon"><i data-lucide="info"></i></div>
+                        <div class="summary-value" id="info-count">0</div>
+                        <div class="summary-label">Info</div>
+                    </div>
+                </div>
+                <div class="live-log">
+                    <div class="log-header"><span><span class="status-dot scanning"></span>Auth Security
+                            Log</span><button class="log-btn" id="clear-log-btn">Clear</button></div>
+                    <div class="log-content" id="attack-log">
+                        <div class="log-entry info">[System] Firebase Auth Scanner ready</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section" id="results-section" style="display:none;">
+                <div class="card-header" style="border-color:#ef4444;">
+                    <h2 class="card-title">Authentication Vulnerabilities</h2>
+                </div>
+                <div id="vulnerability-list"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | Firebase Auth Scanner v1.0</p>
+    </footer>
+    <script src="../js/scanner-nav.js"></script>
+    <script src="../js/firebase-auth-scanner.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

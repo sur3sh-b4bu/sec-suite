@@ -1,0 +1,307 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec Suite | SSRF Auditor</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu">
+                <!-- Injected by scanner-nav.js -->
+            </div>
+            <div class="nav-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">Vector-Tests:</span>
+                    <span class="stat-value" id="total-payloads">150+</span>
+                </div>
+                <div class="stat-badge">
+                    <span class="stat-label">Discovered:</span>
+                    <span class="stat-value" id="vuln-badge">0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <h1 class="hero-title">
+            <span class="glowing-text">SSRF</span> Discovery HUD
+        </h1>
+        <p class="hero-subtitle">
+            Advanced request-state auditor. Automated detection of Localhost escape, Cloud Metadata leakage (AWS/GCP),
+            and Internal Network pivoting.
+        </p>
+    </section>
+
+    <main class="main-content">
+        <section class="container">
+
+            <!-- 1. SSRF Configuration Matrix -->
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">► Target Configuration</h2>
+                </div>
+
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="target-url">Target Endpoint URL</label>
+                        <input type="url" id="target-url" class="input"
+                            placeholder="https://api.system.com/v1/proxy?url=https://image.com/1.jpg">
+                    </div>
+                    <div class="form-group">
+                        <label for="http-method">Request Protocol</label>
+                        <select id="http-method" class="input">
+                            <option value="GET">GET METHOD</option>
+                            <option value="POST">POST METHOD</option>
+                            <option value="PUT">PUT METHOD</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top:2rem;">
+                    <label for="vuln-param">Identity Node (Parameter Name)</label>
+                    <input type="text" id="vuln-param" class="input" placeholder="url / stockApi / imageUrl / path"
+                        value="url">
+                </div>
+
+                <div class="section-label">Attack Profile Matrix</div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-localhost" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Localhost Escape</span>
+                            <span class="checkbox-desc">Audit for 127.0.0.1 and loopback bypass.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-internal" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Internal Pivoting</span>
+                            <span class="checkbox-desc">Test for 192.168.x / 10.x.x private IP access.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-cloud-metadata" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Cloud Metadata</span>
+                            <span class="checkbox-desc">Audit for 169.254.169.254 (AWS/GCP/Azure).</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-port-scan" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Internal Port Audit</span>
+                            <span class="checkbox-desc">Scan for common ports on local gateway.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-bypass-filters" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Filter Bypass</span>
+                            <span class="checkbox-desc">Audit for decimal/hex IP and DNS tricks.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-protocol" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Protocol Smuggling</span>
+                            <span class="checkbox-desc">Audit for file://, gopher://, dict:// streams.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="section-label">High-Value Objective Hub</div>
+                <div class="checkbox-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <label class="checkbox-card" style="padding:1rem;">
+                        <input type="checkbox" id="target-admin" checked>
+                        <div class="checkbox-content"><span class="checkbox-title"
+                                style="font-size:0.8rem;">/admin</span></div>
+                    </label>
+                    <label class="checkbox-card" style="padding:1rem;">
+                        <input type="checkbox" id="target-aws-metadata" checked>
+                        <div class="checkbox-content"><span class="checkbox-title" style="font-size:0.8rem;">AWS
+                                Info</span></div>
+                    </label>
+                    <label class="checkbox-card" style="padding:1rem;">
+                        <input type="checkbox" id="target-internal-api" checked>
+                        <div class="checkbox-content"><span class="checkbox-title" style="font-size:0.8rem;">Int
+                                API</span></div>
+                    </label>
+                    <label class="checkbox-card" style="padding:1rem;">
+                        <input type="checkbox" id="target-file-read" checked>
+                        <div class="checkbox-content"><span class="checkbox-title"
+                                style="font-size:0.8rem;">File-Read</span></div>
+                    </label>
+                </div>
+
+                <div class="form-group" style="margin-top:2rem;">
+                    <label for="collaborator-url">OOB Auditor URL (Blind SSRF)</label>
+                    <input type="text" id="collaborator-url" class="input" placeholder="audit.webhook.site/unique-id">
+                    <small class="input-hint">For detecting blind SSRF via out-of-band DNS/HTTP interaction.</small>
+                </div>
+
+                <div class="scan-controls">
+                    <button id="start-scan-btn" class="btn btn-primary btn-lg">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" style="margin-right:10px;">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                        Initialize SSRF Audit
+                    </button>
+                    <button id="stop-scan-btn" class="btn btn-danger" style="display:none;">Terminate Sequence</button>
+                </div>
+            </div>
+
+            <!-- 2. Execution HUD -->
+            <div id="attack-section" class="attack-viz" style="display:none;">
+                <div class="viz-header">
+                    <h3 class="viz-title">⚡ REAL-TIME SSRF HUD</h3>
+                    <div class="viz-status">
+                        <span class="status-dot scanning"></span>
+                        <span id="scan-status" style="color:var(--clr-success);">ACTIVE_AUDIT</span>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-info"
+                        style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.85rem;color:var(--clr-accent);">
+                        <span id="progress-text">READY</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-stats"
+                        style="display:grid;grid-template-columns:repeat(3, 1fr);text-align:center;">
+                        <div class="stat-item">
+                            <div class="stat-label">Vector Probes</div>
+                            <div class="stat-number" id="tested-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Exploited</div>
+                            <div class="stat-number" id="vuln-count" style="color:var(--clr-success);">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">WAF Blocked</div>
+                            <div class="stat-number" id="blocked-count" style="color:var(--clr-danger);">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="current-payload">
+                    <div class="payload-header">
+                        <span class="payload-label"
+                            style="text-transform:uppercase;font-size:0.75rem;font-weight:800;letter-spacing:0.1em;color:var(--clr-accent);">Active
+                            Vector Probe</span>
+                        <span class="payload-type-badge" id="current-type"
+                            style="background:var(--clr-primary);">STANDBY</span>
+                    </div>
+                    <pre id="current-payload-url"
+                        style="font-size:0.85rem; padding:1.5rem; white-space:pre-wrap;"></pre>
+                </div>
+
+                <div class="live-log">
+                    <div class="log-header">
+                        <span class="log-title">TRANSACTION LOG</span>
+                        <button id="clear-log-btn" class="btn btn-ghost btn-sm">Purge</button>
+                    </div>
+                    <div class="log-content" id="attack-log"></div>
+                </div>
+            </div>
+
+            <!-- 3. Intelligence Evidence -->
+            <div id="results-section" class="results-section" style="display:none;">
+                <div class="results-header"
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3rem;">
+                    <h3 class="results-title">► DISCOVERED VECTORS</h3>
+                    <div style="display:flex;gap:1.5rem;">
+                        <button id="generate-exploit-btn" class="btn btn-primary" style="padding:1rem 2rem;">GENERATE
+                            POC COMMAND</button>
+                        <button id="export-pdf-btn" class="btn btn-success" style="padding:1rem 2rem;">EXPORT
+                            INTEL</button>
+                    </div>
+                </div>
+                <div id="vulnerability-list" class="vulnerability-list"></div>
+            </div>
+
+            <!-- 4. Exploit Generator -->
+            <div id="exploit-section" class="poc-section" style="display:none;">
+                <div class="card-header">
+                    <h3 class="card-title">🔨 SSRF EXPLOIT GENERATOR</h3>
+                </div>
+                <div class="poc-content">
+                    <div class="poc-tabs" style="display:flex;gap:1rem;margin-bottom:2rem;">
+                        <button class="btn btn-ghost active" data-tab="basic"
+                            style="padding:0.75rem 1.5rem;">BASIC</button>
+                        <button class="btn btn-ghost" data-tab="bypass" style="padding:0.75rem 1.5rem;">BYPASS</button>
+                        <button class="btn btn-ghost" data-tab="cloud" style="padding:0.75rem 1.5rem;">CLOUD</button>
+                    </div>
+                    <div class="poc-code-container"
+                        style="background:#000;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;">
+                        <div class="poc-code-header"
+                            style="background:rgba(255,255,255,0.05);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:0.8rem;text-transform:uppercase;color:var(--clr-accent);">Autonomous
+                                Exploit Payload</span>
+                            <button id="copy-exploit-btn" class="btn btn-primary btn-sm">COPY CODE</button>
+                        </div>
+                        <pre id="exploit-code" class="poc-code"
+                            style="padding:2.5rem;color:var(--clr-success);font-family:var(--font-mono);font-size:0.9rem;white-space:pre-wrap;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Research Matrix -->
+            <div class="section-label">SSRF Research Index</div>
+            <div class="technique-grid">
+                <div class="technique-item">
+                    <h4>🔴 Localhost Bypass</h4>
+                    <p>Accessing the loopback interface via obfuscated payloads like <code>http://127.1</code> or
+                        decimal values to reach local admin panels and internal services.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🔴 Cloud Metadata Leak</h4>
+                    <p>Querying the non-routable address <code>169.254.169.254</code> to extract high-value IAM
+                        credentials and instance configuration from AWS, GCP, or Azure.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Protocol Redirection</h4>
+                    <p>Leveraging <code>gopher://</code> or <code>file://</code> to move beyond HTTP, potentially
+                        interacting with redis, memcached, or reading local sensitive files.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 DNS Rebinding</h4>
+                    <p>Controlling a DNS server that returns a public IP initially, then quickly switches to a private
+                        local IP to bypass domain-based IP validation filters.</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | Educational SSRF Module</p>
+    </footer>
+
+    <script type="module" src="../js/firebase-config.js"></script>
+    <script src="../js/ssrf-payloads.js"></script>
+    <script src="../js/ssrf-scanner.js"></script>
+    <script src="../js/scanner-nav.js"></script>
+        <script src="../js/pdf-report.js"></script>
+    <script src="../js/scanner-utils.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

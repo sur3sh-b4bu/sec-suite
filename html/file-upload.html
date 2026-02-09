@@ -1,0 +1,281 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec Suite | File Upload Auditor</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu">
+                <!-- Injected by scanner-nav.js -->
+            </div>
+            <div class="nav-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">Vector-Tests:</span>
+                    <span class="stat-value" id="total-tests">60+</span>
+                </div>
+                <div class="stat-badge">
+                    <span class="stat-label">Discovered:</span>
+                    <span class="stat-value" id="vuln-badge">0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <h1 class="hero-title">
+            <span class="glowing-text">File Upload</span> Discovery
+        </h1>
+        <p class="hero-subtitle">
+            Advanced payload-delivery auditor. Specialized detection for Web Shells, Extension Spoofing, and Polyglot
+            implementation flaws.
+        </p>
+    </section>
+
+    <main class="main-content">
+        <section class="container">
+
+            <!-- 1. Upload Configuration Matrix -->
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">► Storage Environment</h2>
+                </div>
+
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="target-url">Upload Endpoint URL</label>
+                        <input type="url" id="target-url" class="input"
+                            placeholder="https://app.system.com/avatar/upload">
+                    </div>
+                    <div class="form-group">
+                        <label for="upload-path">Public Retrieval Path</label>
+                        <input type="text" id="upload-path" class="input" placeholder="/static/uploads/"
+                            value="/static/uploads/">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top:2rem;">
+                    <label for="server-type">Server-Side Integration</label>
+                    <select id="server-type" class="input">
+                        <option value="php">PHP / Apache</option>
+                        <option value="jsp">JSP / Tomcat</option>
+                        <option value="asp">ASP.NET / IIS</option>
+                        <option value="python">Python / Django</option>
+                        <option value="node">Node.js / Express</option>
+                    </select>
+                </div>
+
+                <div class="section-label">Attack Profile Matrix</div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-webshell" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Web Shell Delivery</span>
+                            <span class="checkbox-desc">Audit for RCE via executable script upload.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-extension" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Extension Bypass</span>
+                            <span class="checkbox-desc">Test .php5, .phtml, and double-extension logic.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-contenttype" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">MIME Spoofing</span>
+                            <span class="checkbox-desc">Bypass filters via Content-Type header manipulation.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-polyglot" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Polyglot Embedding</span>
+                            <span class="checkbox-desc">Audit for PHP code hidden within GIF/JPEG headers.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-path" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Traversal Write</span>
+                            <span class="checkbox-desc">Attempt to write files outside of the upload tree.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-htaccess" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Config Override</span>
+                            <span class="checkbox-desc">Audit for .htaccess or web.config upload flaws.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="scan-controls">
+                    <button id="start-scan-btn" class="btn btn-primary btn-lg">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" style="margin-right:10px;">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                        Initialize Upload Audit
+                    </button>
+                    <button id="stop-scan-btn" class="btn btn-danger" style="display:none;">Terminate Sequence</button>
+                </div>
+            </div>
+
+            <!-- 2. Execution HUD -->
+            <div id="attack-section" class="attack-viz" style="display:none;">
+                <div class="viz-header">
+                    <h3 class="viz-title">⚡ REAL-TIME UPLOAD AUDIT HUD</h3>
+                    <div class="viz-status">
+                        <span class="status-dot scanning"></span>
+                        <span id="scan-status" style="color:var(--clr-success);">ACTIVE_AUDIT</span>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-info"
+                        style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.85rem;color:var(--clr-accent);">
+                        <span id="progress-text">READY</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-stats"
+                        style="display:grid;grid-template-columns:repeat(3, 1fr);text-align:center;">
+                        <div class="stat-item">
+                            <div class="stat-label">Upload Probes</div>
+                            <div class="stat-number" id="tested-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Exploited</div>
+                            <div class="stat-number" id="vuln-count" style="color:var(--clr-success);">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">RCE Confirmed</div>
+                            <div class="stat-number" id="rce-count" style="color:var(--clr-danger);">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="current-payload">
+                    <div class="payload-header">
+                        <span class="payload-label"
+                            style="text-transform:uppercase;font-size:0.75rem;font-weight:800;letter-spacing:0.1em;color:var(--clr-accent);">Active
+                            Binary Probe</span>
+                        <span class="payload-type-badge" id="current-type"
+                            style="background:var(--clr-primary);">STANDBY</span>
+                    </div>
+                    <pre id="current-test-details"
+                        style="font-size:0.85rem; padding:1.5rem; white-space:pre-wrap;"></pre>
+                </div>
+
+                <div class="live-log">
+                    <div class="log-header">
+                        <span class="log-title">UPLOAD TRANSACTION LOG</span>
+                        <button id="clear-log-btn" class="btn btn-ghost btn-sm">Purge</button>
+                    </div>
+                    <div class="log-content" id="attack-log"></div>
+                </div>
+            </div>
+
+            <!-- 3. Intelligence Evidence -->
+            <div id="results-section" class="results-section" style="display:none;">
+                <div class="results-header"
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3rem;">
+                    <h3 class="results-title">► DISCOVERED VECTORS</h3>
+                    <div style="display:flex;gap:1.5rem;">
+                        <button id="generate-exploit-btn" class="btn btn-primary" style="padding:1rem 2rem;">GENERATE
+                            POC FILE</button>
+                        <button id="export-pdf-btn" class="btn btn-success" style="padding:1rem 2rem;">EXPORT
+                            INTEL</button>
+                    </div>
+                </div>
+                <div id="vulnerability-list" class="vulnerability-list"></div>
+            </div>
+
+            <!-- 4. Exploit Generator -->
+            <div id="exploit-section" class="poc-section" style="display:none;">
+                <div class="card-header">
+                    <h3 class="card-title">🔨 FILE EXPLOIT GENERATOR</h3>
+                </div>
+                <div class="poc-content">
+                    <div class="poc-tabs" style="display:flex;gap:1rem;margin-bottom:2rem;">
+                        <button class="btn btn-ghost active" data-tab="webshell"
+                            style="padding:0.75rem 1.5rem;">WEBSHELL</button>
+                        <button class="btn btn-ghost" data-tab="extension"
+                            style="padding:0.75rem 1.5rem;">BYPASS</button>
+                        <button class="btn btn-ghost" data-tab="polyglot"
+                            style="padding:0.75rem 1.5rem;">POLYGLOT</button>
+                    </div>
+                    <div class="poc-code-container"
+                        style="background:#000;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;">
+                        <div class="poc-code-header"
+                            style="background:rgba(255,255,255,0.05);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:0.8rem;text-transform:uppercase;color:var(--clr-accent);">Autonomous
+                                Exploit Payload</span>
+                            <button id="copy-exploit-btn" class="btn btn-primary btn-sm">COPY CODE</button>
+                        </div>
+                        <pre id="exploit-code" class="poc-code"
+                            style="padding:2.5rem;color:var(--clr-success);font-family:var(--font-mono);font-size:0.9rem;white-space:pre-wrap;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Research Matrix -->
+            <div class="section-label">File Upload Research Index</div>
+            <div class="technique-grid">
+                <div class="technique-item">
+                    <h4>🔴 Web Shell Upload</h4>
+                    <p>Submitting a file containing server-side code (PHP, ASP, JSP) that, once uploaded and accessed,
+                        allows for Remote Code Execution.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🔴 Extension Blacklist Bypass</h4>
+                    <p>Using alternative extensions (<code>.php5</code>, <code>.phtml</code>) or tricking server logic
+                        via double extensions (<code>.php.jpg</code>) or null bytes.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Image Polyglot Flaw</h4>
+                    <p>Crafting a file that is valid as both an image (e.g., GIF89a) and a script. This bypasses
+                        client-side and server-side image verification.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Config Override (.htaccess)</h4>
+                    <p>Uploading a <code>.htaccess</code> file to an Apache server to modify directory configurations
+                        and allow execution of arbitrary file types.</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | Educational Upload Module</p>
+    </footer>
+
+    <script type="module" src="../js/firebase-config.js"></script>
+    <script src="../js/file-upload-payloads.js"></script>
+    <script src="../js/file-upload-scanner.js"></script>
+    <script src="../js/scanner-nav.js"></script>
+        <script src="../js/pdf-report.js"></script>
+    <script src="../js/scanner-utils.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

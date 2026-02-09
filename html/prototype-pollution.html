@@ -1,0 +1,283 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec Suite | Prototype Pollution Auditor</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu">
+                <!-- Injected by scanner-nav.js -->
+            </div>
+            <div class="nav-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">Vector-Tests:</span>
+                    <span class="stat-value" id="total-tests">50+</span>
+                </div>
+                <div class="stat-badge">
+                    <span class="stat-label">Discovered:</span>
+                    <span class="stat-value" id="vuln-badge">0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <h1 class="hero-title">
+            <span class="glowing-text">Prototype</span> Pollution Discovery
+        </h1>
+        <p class="hero-subtitle">
+            Advanced object-state auditor. Automated detection of Client-side/Server-side Pollution, RCE Gadgets, and
+            DOM-XSS vectors.
+        </p>
+    </section>
+
+    <main class="main-content">
+        <section class="container">
+
+            <!-- 1. Pollution Configuration Matrix -->
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">► Object Environment</h2>
+                </div>
+
+                <div class="form-group" style="margin-bottom:2rem;">
+                    <label for="target-url">Target Endpoint URL</label>
+                    <input type="url" id="target-url" class="input"
+                        placeholder="https://app.system.com/search?query=id">
+                </div>
+
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="inject-point">Injection Context</label>
+                        <select id="inject-point" class="input">
+                            <option value="url">URL QUERY PARAMETERS</option>
+                            <option value="hash">URL HASH FRAGMENT</option>
+                            <option value="json">JSON DATA STREAM</option>
+                            <option value="all">UNIFIED HUB AUDIT</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="framework">Target Framework Profile</label>
+                        <select id="framework" class="input">
+                            <option value="auto">AUTONOMOUS DETECTION</option>
+                            <option value="jquery">jQuery-based HUD</option>
+                            <option value="lodash">Lodash Utility Audit</option>
+                            <option value="express">Express/EJS Backend</option>
+                            <option value="pug">Pug Template Logic</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="section-label">Attack Profile Matrix</div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-client" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Client-side Audit</span>
+                            <span class="checkbox-desc">Test for browser-level Object.prototype leakage.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-server" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Server-side Audit</span>
+                            <span class="checkbox-desc">Audit for backend-level prototype contamination.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-xss" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">DOM XSS Gadgets</span>
+                            <span class="checkbox-desc">Test for innerHTML/src sink escalation.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-privesc" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Identity Escalation</span>
+                            <span class="checkbox-desc">Test for isAdmin/role property override.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-rce" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">RCE Gadget Audit</span>
+                            <span class="checkbox-desc">Audit for template engine shell execution.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="test-bypass" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Evasion Bypass</span>
+                            <span class="checkbox-desc">Test Unicode/constructor secondary paths.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="scan-controls">
+                    <button id="start-scan-btn" class="btn btn-primary btn-lg">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" style="margin-right:10px;">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                        Initialize Object Audit
+                    </button>
+                    <button id="stop-scan-btn" class="btn btn-danger" style="display:none;">Terminate Sequence</button>
+                </div>
+            </div>
+
+            <!-- 2. Execution HUD -->
+            <div id="attack-section" class="attack-viz" style="display:none;">
+                <div class="viz-header">
+                    <h3 class="viz-title">⚡ REAL-TIME POLLUTION HUD</h3>
+                    <div class="viz-status">
+                        <span class="status-dot scanning"></span>
+                        <span id="scan-status" style="color:var(--clr-success);">ACTIVE_AUDIT</span>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-info"
+                        style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.85rem;color:var(--clr-accent);">
+                        <span id="progress-text">READY</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-stats"
+                        style="display:grid;grid-template-columns:repeat(3, 1fr);text-align:center;">
+                        <div class="stat-item">
+                            <div class="stat-label">Object Probes</div>
+                            <div class="stat-number" id="tested-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Polluted</div>
+                            <div class="stat-number" id="vuln-count" style="color:var(--clr-success);">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">RCE Vectors</div>
+                            <div class="stat-number" id="rce-count" style="color:var(--clr-danger);">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="current-payload">
+                    <div class="payload-header">
+                        <span class="payload-label"
+                            style="text-transform:uppercase;font-size:0.75rem;font-weight:800;letter-spacing:0.1em;color:var(--clr-accent);">Active
+                            Object Probe</span>
+                        <span class="payload-type-badge" id="current-type"
+                            style="background:var(--clr-primary);">STANDBY</span>
+                    </div>
+                    <pre id="current-test-details"
+                        style="font-size:0.85rem; padding:1.5rem; white-space:pre-wrap;"></pre>
+                </div>
+
+                <div class="live-log">
+                    <div class="log-header">
+                        <span class="log-title">OBJECT TRANSACTION LOG</span>
+                        <button id="clear-log-btn" class="btn btn-ghost btn-sm">Purge</button>
+                    </div>
+                    <div class="log-content" id="attack-log"></div>
+                </div>
+            </div>
+
+            <!-- 3. Intelligence Evidence -->
+            <div id="results-section" class="results-section" style="display:none;">
+                <div class="results-header"
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3rem;">
+                    <h3 class="results-title">► DISCOVERED VECTORS</h3>
+                    <div style="display:flex;gap:1.5rem;">
+                        <button id="generate-exploit-btn" class="btn btn-primary" style="padding:1rem 2rem;">GENERATE
+                            POC OBJECT</button>
+                        <button id="export-pdf-btn" class="btn btn-success" style="padding:1rem 2rem;">EXPORT
+                            INTEL</button>
+                    </div>
+                </div>
+                <div id="vulnerability-list" class="vulnerability-list"></div>
+            </div>
+
+            <!-- 4. Exploit Generator -->
+            <div id="exploit-section" class="poc-section" style="display:none;">
+                <div class="card-header">
+                    <h3 class="card-title">🔨 POLLUTION EXPLOIT GENERATOR</h3>
+                </div>
+                <div class="poc-content">
+                    <div class="poc-tabs" style="display:flex;gap:1rem;margin-bottom:2rem;">
+                        <button class="btn btn-ghost active" data-tab="client"
+                            style="padding:0.75rem 1.5rem;">CLIENT</button>
+                        <button class="btn btn-ghost" data-tab="server" style="padding:0.75rem 1.5rem;">SERVER</button>
+                        <button class="btn btn-ghost" data-tab="xss" style="padding:0.75rem 1.5rem;">XSS GADGET</button>
+                    </div>
+                    <div class="poc-code-container"
+                        style="background:#000;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;">
+                        <div class="poc-code-header"
+                            style="background:rgba(255,255,255,0.05);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:0.8rem;text-transform:uppercase;color:var(--clr-accent);">Autonomous
+                                Exploit Payload</span>
+                            <button id="copy-exploit-btn" class="btn btn-primary btn-sm">COPY CODE</button>
+                        </div>
+                        <pre id="exploit-code" class="poc-code"
+                            style="padding:2.5rem;color:var(--clr-success);font-family:var(--font-mono);font-size:0.9rem;white-space:pre-wrap;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Research Matrix -->
+            <div class="section-label">Prototype Pollution Research Index</div>
+            <div class="technique-grid">
+                <div class="technique-item">
+                    <h4>🔴 Client-side Pollution</h4>
+                    <p>Manipulating URL parameters like <code>__proto__[color]=red</code> to inject properties into all
+                        JavaScript objects, potentially leading to DOM-XSS.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🔴 Server-side RCE</h4>
+                    <p>Polluting the global <code>Object.prototype</code> on the backend to manipulate template engine
+                        configuration (e.g., EJS) for arbitrary shell execution.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Prototype Gadget</h4>
+                    <p>Finding existing code ("gadgets") that use a property in an insecure way, which becomes
+                        exploitable once that property is polluted globally.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Constructor Evasion</h4>
+                    <p>Bypassing <code>__proto__</code> filters by using alternative paths like
+                        <code>constructor.prototype.targetProperty</code> to achieve the same result.</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | Educational Pollution Module</p>
+    </footer>
+
+    <script type="module" src="../js/firebase-config.js"></script>
+    <script src="../js/prototype-pollution-payloads.js"></script>
+    <script src="../js/prototype-pollution-scanner.js"></script>
+    <script src="../js/scanner-nav.js"></script>
+        <script src="../js/pdf-report.js"></script>
+    <script src="../js/scanner-utils.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

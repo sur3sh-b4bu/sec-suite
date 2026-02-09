@@ -1,0 +1,309 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec Suite | OS Command Auditor</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="brand-text">CyberSec Suite</span>
+            </div>
+            <div class="nav-menu">
+                <!-- Injected by scanner-nav.js -->
+            </div>
+            <div class="nav-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">Vector-Tests:</span>
+                    <span class="stat-value" id="total-payloads">180+</span>
+                </div>
+                <div class="stat-badge">
+                    <span class="stat-label">Discovered:</span>
+                    <span class="stat-value" id="vuln-badge">0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <h1 class="hero-title">
+            <span class="glowing-text">OS Command</span> Discovery
+        </h1>
+        <p class="hero-subtitle">
+            Advanced shell injection engine. Automated detection of binary execution, pipe manipulation, and
+            asynchronous OOB exfiltration.
+        </p>
+    </section>
+
+    <main class="main-content">
+        <section class="container">
+
+            <!-- 1. OS Configuration Matrix -->
+            <div class="config-card">
+                <div class="card-header">
+                    <h2 class="card-title">► Shell Environment</h2>
+                </div>
+
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="target-url">Target Endpoint</label>
+                        <input type="url" id="target-url" class="input" placeholder="https://api.system.com/status">
+                    </div>
+                    <div class="form-group">
+                        <label for="http-method">Interaction Pattern</label>
+                        <select id="http-method" class="input">
+                            <option value="GET">GET REQUEST</option>
+                            <option value="POST">POST REQUEST</option>
+                            <option value="PUT">PUT REQUEST</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="config-grid" style="margin-top:2rem;">
+                    <div class="form-group">
+                        <label for="vuln-param">Injection Node (Param)</label>
+                        <input type="text" id="vuln-param" class="input" placeholder="id, cmd, email" value="id">
+                    </div>
+                    <div class="form-group">
+                        <label for="os-type">Target Kernel Architecture</label>
+                        <select id="os-type" class="input">
+                            <option value="both">Hybrid (Linux & Windows)</option>
+                            <option value="linux">POSIX / Linux</option>
+                            <option value="windows">NT / Windows</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="section-label">Execution Vector Matrix</div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-basic" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Inline Execution</span>
+                            <span class="checkbox-desc">Audit for ; | & || && separators.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-blind" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">OOB Blind Test</span>
+                            <span class="checkbox-desc">Trigger DNS/HTTP callbacks for hidden execution.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-time-based" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Time Correlation</span>
+                            <span class="checkbox-desc">Detect execution via sleep/ping latency.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-output-based" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Direct Return</span>
+                            <span class="checkbox-desc">Analyze responses for direct command output.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-filter-bypass" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Normalization Bypass</span>
+                            <span class="checkbox-desc">Audit with encoded and obfuscated syntax.</span>
+                        </div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="attack-data-exfil" checked>
+                        <div class="checkbox-content">
+                            <span class="checkbox-title">Intel Exfiltration</span>
+                            <span class="checkbox-desc">Attempt automated extraction of /etc/passwd.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="section-label">Command Payloads</div>
+                <div class="checkbox-grid" style="grid-template-columns:repeat(4, 1fr);">
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="cmd-whoami" checked>
+                        <div class="checkbox-content">whoami</div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="cmd-pwd" checked>
+                        <div class="checkbox-content">pwd / dir</div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="cmd-ls" checked>
+                        <div class="checkbox-content">ls / ls -la</div>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" id="cmd-cat" checked>
+                        <div class="checkbox-content">cat / type</div>
+                    </label>
+                </div>
+
+                <div class="form-group" style="margin:2rem 0;">
+                    <label for="collaborator-url">OOB Callback Auditor (URL)</label>
+                    <input type="text" id="collaborator-url" class="input" placeholder="https://oob-auditor.net">
+                </div>
+
+                <div class="scan-controls">
+                    <button id="start-scan-btn" class="btn btn-primary btn-lg">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" style="margin-right:10px;">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                        Initialize Shell Audit
+                    </button>
+                    <button id="stop-scan-btn" class="btn btn-danger" style="display:none;">Terminate Sequence</button>
+                </div>
+            </div>
+
+            <!-- 2. Execution HUD -->
+            <div id="attack-section" class="attack-viz" style="display:none;">
+                <div class="viz-header">
+                    <h3 class="viz-title">⚡ REAL-TIME SHELL AUDIT HUD</h3>
+                    <div class="viz-status">
+                        <span class="status-dot scanning"></span>
+                        <span id="scan-status">SEQUENCING...</span>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-info"
+                        style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.85rem;color:var(--clr-accent);">
+                        <span id="progress-text">READY</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-stats"
+                        style="display:grid;grid-template-columns:repeat(3, 1fr);text-align:center;">
+                        <div class="stat-item">
+                            <div class="stat-label">Command Matrix</div>
+                            <div class="stat-number" id="tested-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Exploited</div>
+                            <div class="stat-number" id="vuln-count" style="color:var(--clr-success);">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Filtered</div>
+                            <div class="stat-number" id="blocked-count" style="color:var(--clr-danger);">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="current-payload">
+                    <div class="payload-header">
+                        <span class="payload-label"
+                            style="text-transform:uppercase;font-size:0.75rem;font-weight:800;letter-spacing:0.1em;color:var(--clr-accent);">Active
+                            Binary Probe</span>
+                        <span class="payload-type-badge" id="current-type"
+                            style="background:var(--clr-primary);">STANDBY</span>
+                    </div>
+                    <pre id="current-payload-cmd" style="font-size:0.85rem; padding:1.5rem;"></pre>
+                </div>
+
+                <div class="live-log">
+                    <div class="log-header">
+                        <span class="log-title">SHELL TRANSACTION LOG</span>
+                        <button id="clear-log-btn" class="btn btn-ghost btn-sm">Purge</button>
+                    </div>
+                    <div class="log-content" id="attack-log"></div>
+                </div>
+            </div>
+
+            <!-- 3. Intelligence Evidence -->
+            <div id="results-section" class="results-section" style="display:none;">
+                <div class="results-header"
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3rem;">
+                    <h3 class="results-title">► BREACHED SHELLS</h3>
+                    <div style="display:flex;gap:1.5rem;">
+                        <button id="generate-exploit-btn" class="btn btn-primary" style="padding:1rem 2rem;">GENERATE
+                            POC SCRIPT</button>
+                        <button id="export-pdf-btn" class="btn btn-success" style="padding:1rem 2rem;">EXPORT
+                            INTEL</button>
+                    </div>
+                </div>
+                <div id="vulnerability-list" class="vulnerability-list"></div>
+            </div>
+
+            <!-- 4. Exploit Generator -->
+            <div id="exploit-section" class="poc-section" style="display:none;">
+                <div class="card-header">
+                    <h3 class="card-title">🔨 SHELL EXPLOIT GENERATOR</h3>
+                </div>
+                <div class="poc-content">
+                    <div class="poc-tabs" style="display:flex;gap:1rem;margin-bottom:2rem;">
+                        <button class="btn btn-ghost active" data-tab="basic"
+                            style="padding:0.75rem 1.5rem;">BASIC</button>
+                        <button class="btn btn-ghost" data-tab="blind" style="padding:0.75rem 1.5rem;">BLIND</button>
+                        <button class="btn btn-ghost" data-tab="reverse-shell"
+                            style="padding:0.75rem 1.5rem;">REVERSE</button>
+                    </div>
+                    <div class="poc-code-container"
+                        style="background:#000;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;">
+                        <div class="poc-code-header"
+                            style="background:rgba(255,255,255,0.05);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:0.8rem;text-transform:uppercase;color:var(--clr-accent);">Autonomous
+                                Exploit Payload</span>
+                            <button id="copy-exploit-btn" class="btn btn-primary btn-sm">COPY CODE</button>
+                        </div>
+                        <pre id="exploit-code" class="poc-code"
+                            style="padding:2.5rem;color:var(--clr-success);font-family:var(--font-mono);font-size:0.9rem;white-space:pre-wrap;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Research Matrix -->
+            <div class="section-label">Command Injection Research Index</div>
+            <div class="technique-grid">
+                <div class="technique-item">
+                    <h4>🔴 Separator Injection</h4>
+                    <p>Using logical operators (<code>;</code>, <code>&</code>, <code>|</code>) to append malicious
+                        commands to legitimate OS execution calls.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🔴 Blind OOB Discovery</h4>
+                    <p>Triggering external network requests (DNS/HTTP) from the victim server to confirm execution when
+                        output is hidden.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Time Correlation</h4>
+                    <p>Using <code>sleep</code> or <code>ping</code> counts to infer execution success based on server
+                        response latency.</p>
+                </div>
+                <div class="technique-item">
+                    <h4>🟡 Filter Obfuscation</h4>
+                    <p>Bypassing WAF/IDS limits using globbing, environment variables, or encoded character streams.</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 CyberSec Suite | Educational Command Module</p>
+    </footer>
+
+    <script type="module" src="../js/firebase-config.js"></script>
+    <script src="../js/cmdi-payloads.js"></script>
+    <script src="../js/cmdi-scanner.js"></script>
+    <script src="../js/scanner-nav.js"></script>
+        <script src="../js/pdf-report.js"></script>
+    <script src="../js/scanner-utils.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>
