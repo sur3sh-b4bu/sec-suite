@@ -60,83 +60,17 @@
                         <input type="url" id="target-url" class="input"
                             placeholder="https://api.system.com/products?category=Gifts">
                     </div>
-                    <div class="form-group">
-                        <label for="http-method">Request Protocol</label>
-                        <select id="http-method" class="input">
-                            <option value="GET">GET METHOD</option>
-                            <option value="POST">POST METHOD</option>
-                        </select>
-                    </div>
                 </div>
 
-                <div class="form-group" style="margin-top:2rem;">
-                    <label for="vuln-param">Identity Node (Parameter Name)</label>
-                    <input type="text" id="vuln-param" class="input" placeholder="id / category / user / filter"
-                        value="category">
-                </div>
+                <!-- Auto-CORS detection enabled internally -->
 
-                <div class="section-label">Attack Profile Matrix</div>
-                <div class="checkbox-grid">
-                    <label class="checkbox-card">
-                        <input type="checkbox" id="attack-error" checked>
-                        <div class="checkbox-content">
-                            <span class="checkbox-title">Error-Based</span>
-                            <span class="checkbox-desc">Audit for database schema leaks via verbose errors.</span>
-                        </div>
-                    </label>
-                    <label class="checkbox-card">
-                        <input type="checkbox" id="attack-boolean" checked>
-                        <div class="checkbox-content">
-                            <span class="checkbox-title">Boolean-Based</span>
-                            <span class="checkbox-desc">Test for inference via differential response states.</span>
-                        </div>
-                    </label>
-                    <label class="checkbox-card">
-                        <input type="checkbox" id="attack-time" checked>
-                        <div class="checkbox-content">
-                            <span class="checkbox-title">Time-Blind</span>
-                            <span class="checkbox-desc">Audit for execution via sub-second delay variance.</span>
-                        </div>
-                    </label>
-                    <label class="checkbox-card">
-                        <input type="checkbox" id="attack-union" checked>
-                        <div class="checkbox-content">
-                            <span class="checkbox-title">UNION-Based</span>
-                            <span class="checkbox-desc">Retrieve cross-table data using UNION SELECT.</span>
-                        </div>
-                    </label>
-                    <label class="checkbox-card">
-                        <input type="checkbox" id="attack-out-of-band" checked>
-                        <div class="checkbox-content">
-                            <span class="checkbox-title">Out-of-Band</span>
-                            <span class="checkbox-desc">Exfiltrate data via DNS/HTTP interaction nodes.</span>
-                        </div>
-                    </label>
-                    <label class="checkbox-card">
-                        <input type="checkbox" id="attack-db-specific" checked>
-                        <div class="checkbox-content">
-                            <span class="checkbox-title">DB-Specific</span>
-                            <span class="checkbox-desc">Tailor probes for MySQL, PostgreSQL, Oracle, MSSQL.</span>
-                        </div>
-                    </label>
-                </div>
-
-                <div class="section-label">OOB Auditor URL (Blind SQLi)</div>
-                <div class="form-group">
-                    <input type="text" id="collaborator-url" class="input" placeholder="audit.webhook.site/unique-id">
-                    <small class="input-hint">Threshold for blind execution verification via external DNS/HTTP
-                        interaction.</small>
-                </div>
 
                 <div class="scan-controls">
-                    <button id="start-scan-btn" class="btn btn-primary btn-lg">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" style="margin-right:10px;">
-                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                        </svg>
-                        Initialize SQLi Audit
+                    <button id="automated-scan-btn" class="btn btn-accent btn-lg"
+                        style="margin-left: 1rem; background: var(--clr-secondary);">
+                        <i data-lucide="bot" style="margin-right: 10px;"></i>
+                        Start Interactive Audit
                     </button>
-                    <button id="stop-scan-btn" class="btn btn-danger" style="display:none;">Terminate Sequence</button>
                 </div>
             </div>
 
@@ -176,25 +110,96 @@
                     </div>
                 </div>
 
-                <div class="current-payload">
-                    <div class="payload-header">
-                        <span class="payload-label"
-                            style="text-transform:uppercase;font-size:0.75rem;font-weight:800;letter-spacing:0.1em;color:var(--clr-accent);">Active
-                            Vector Probe</span>
-                        <span class="payload-type-badge" id="current-type"
-                            style="background:var(--clr-primary);">STANDBY</span>
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div class="card-header" style="justify-content: flex-start; gap: 0.5rem;">
+                        <i data-lucide="crosshair" style="width:18px; height:18px; color:var(--clr-accent);"></i>
+                        <h4 style="margin:0; font-size:0.9rem;">Target URL</h4>
+                        <span id="security-status"
+                            style="font-size:0.65rem; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.3); color: var(--clr-dim); font-family:var(--font-mono); margin-left: auto;">STANDBY</span>
                     </div>
-                    <pre id="current-payload-code"
-                        style="font-size:0.85rem; padding:1.5rem; white-space:pre-wrap;"></pre>
+                    <div style="padding: 1rem; display: flex; gap: 0.5rem;">
+                        <input type="text" id="target-url" class="input" placeholder="https://vulnerable.site/login"
+                            style="flex: 1;">
+                        <button id="automated-scan-btn" class="btn btn-primary" style="white-space: nowrap;">
+                            <i data-lucide="zap" style="width:16px; height:16px; margin-right:4px;"></i> Automated Login
+                            Audit
+                        </button>
+                    </div>
                 </div>
+                <div class="payload-header">
+                    <span class="payload-label"
+                        style="text-transform:uppercase;font-size:0.75rem;font-weight:800;letter-spacing:0.1em;color:var(--clr-accent);">Active
+                        Vector Probe</span>
+                    <span class="payload-type-badge" id="current-type"
+                        style="background:var(--clr-primary);">STANDBY</span>
+                </div>
+                <pre id="current-payload-code" style="font-size:0.85rem; padding:1.5rem; white-space:pre-wrap;"></pre>
+            </div>
 
-                <div class="live-log">
-                    <div class="log-header">
-                        <span class="log-title">TRANSACTION LOG</span>
-                        <button id="clear-log-btn" class="btn btn-ghost btn-sm">Purge</button>
-                    </div>
-                    <div class="log-content" id="attack-log"></div>
+            <!-- Form Parameter Override Section -->
+            <div id="form-override-section" class="card"
+                style="display:none; margin: 1.5rem 0; background: rgba(0,0,0,0.3); border: 1px dashed var(--clr-accent);">
+                <div class="card-header" style="padding: 1rem;">
+                    <h4 style="font-size:0.9rem; color:var(--clr-accent); margin:0;">📋 INTERACTIVE FORM
+                        MAPPING
+                    </h4>
+                    <small style="color:var(--clr-dim);">Verify or correct the discovered parameters
+                        below.</small>
                 </div>
+                <div id="form-params-container"
+                    style="padding: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <!-- Dynamic Inputs Go Here -->
+                </div>
+                <div style="padding: 1rem; text-align: right; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <button id="add-param-btn" class="btn btn-outline"
+                        style="font-size: 0.75rem; padding: 0.4rem 0.8rem; margin-right: 8px;">
+                        <i data-lucide="plus" style="width:14px; height:14px; margin-right:4px;"></i> Add
+                        Manual
+                        Param
+                    </button>
+                    <button id="resume-audit-btn" class="btn btn-success">
+                        <i data-lucide="play" style="margin-right:8px;"></i> Continue Sequence
+                    </button>
+                </div>
+            </div>
+
+            <!-- CORS Troubleshooting Section -->
+            <div id="cors-troubleshooting" class="card"
+                style="display:none; margin: 1.5rem 0; border: 1px solid var(--clr-danger); background: rgba(220, 38, 38, 0.1);">
+                <div class="card-header" style="padding: 1rem; border-bottom: 1px solid rgba(220, 38, 38, 0.2);">
+                    <h4 style="font-size:0.9rem; color:var(--clr-danger); margin:0;">⚠️ SECURITY CONTEXT
+                        WARNING
+                    </h4>
+                </div>
+                <div style="padding: 1rem; font-size: 0.85rem; color: var(--clr-dim);">
+                    <p style="margin-bottom: 0.5rem;">The target server returned a <strong
+                            style="color:var(--clr-danger);">400 Bad Request</strong>. This usually means
+                        the
+                        <strong>CSRF token</strong> or <strong>Session Cookie</strong> is missing/invalid.
+                    </p>
+                    <p style="margin-bottom: 0.5rem;">To fix this, you must allow the browser to send
+                        credentials
+                        cross-origin:</p>
+                    <ol style="margin-left: 1.5rem; margin-bottom: 1rem;">
+                        <li>Close all Chrome instances.</li>
+                        <li>Run Chrome with security disabled:
+                            <code
+                                style="display:block; background:rgba(0,0,0,0.4); padding:0.5rem; margin:0.3rem 0; border-radius:4px; font-family:var(--font-mono); font-size:0.75rem; color:var(--clr-accent);">chrome.exe --user-data-dir="C:/ChromeDev" --disable-web-security</code>
+                        </li>
+                        <li>Open the scanner and target again. <strong>Direct Fetch</strong> should now work
+                            with
+                            cookies.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="live-log">
+                <div class="log-header">
+                    <span class="log-title">TRANSACTION LOG</span>
+                    <button id="clear-log-btn" class="btn btn-ghost btn-sm">Purge</button>
+                </div>
+                <div class="log-content" id="attack-log"></div>
+            </div>
             </div>
 
             <!-- 3. Intelligence Evidence -->
@@ -243,24 +248,40 @@
             <!-- 5. Research Matrix -->
             <div class="section-label">SQLi Research Index</div>
             <div class="technique-grid">
+                <div id="cors-troubleshooting" class="troubleshooting-card"
+                    style="display:none; margin-top:1.5rem; border:1px solid var(--clr-accent); background:rgba(255,165,0,0.05);">
+                    <h4 style="color:var(--clr-accent); margin-top:0;"><i data-lucide="shield-alert"></i> Session
+                        Mismatch (400) Detected</h4>
+                    <p style="font-size:0.85rem; line-height:1.4;">The browser is blocking the JS scanner's cookies. For
+                        a 100% reliable bypass, use the <strong>Python Engine</strong> in your terminal:</p>
+                    <code
+                        style="display:block; background:#000; padding:0.8rem; border-radius:4px; font-size:0.75rem; color:#fff; word-break:break-all;">python py/sqli_engine.py --url [TARGET_URL] --param [PARAM_NAME] --value [BASE_VALUE]</code>
+                    <p style="font-size:0.75rem; margin-top:0.5rem; color:var(--clr-dim);">The Python script handles
+                        sessions and CSRF natively, bypassing all browser restrictions.</p>
+                </div>
                 <div class="technique-item">
                     <h4>🔴 Error-Based Leakage</h4>
-                    <p>Triggering specific database errors (e.g., via <code>1/0</code> or type conversion) that contain
+                    <p>Triggering specific database errors (e.g., via <code>1/0</code> or type conversion) that
+                        contain
                         data from the database within the error message itself.</p>
                 </div>
                 <div class="technique-item">
                     <h4>🔴 SQL UNION Selection</h4>
-                    <p>Appending a <code>UNION SELECT</code> statement to the original query to retrieve data from other
+                    <p>Appending a <code>UNION SELECT</code> statement to the original query to retrieve data
+                        from other
                         tables in the database within the original output stream.</p>
                 </div>
                 <div class="technique-item">
                     <h4>🟡 Time-Blind Inference</h4>
-                    <p>Submitting queries that use <code>pg_sleep(5)</code> or <code>WAITFOR DELAY '0:0:5'</code> to
-                        infer information based on how long the server takes to respond.</p>
+                    <p>Submitting queries that use <code>pg_sleep(5)</code> or
+                        <code>WAITFOR DELAY '0:0:5'</code> to
+                        infer information based on how long the server takes to respond.
+                    </p>
                 </div>
                 <div class="technique-item">
                     <h4>🟡 Out-of-Band Exfiltration</h4>
-                    <p>Using database features to make network requests (e.g., DNS lookups) containing data as part of
+                    <p>Using database features to make network requests (e.g., DNS lookups) containing data as
+                        part of
                         the hostname, to bypass traditional response-based filtering.</p>
                 </div>
             </div>
@@ -275,10 +296,11 @@
     <script type="module" src="../js/firebase-config.js"></script>
     <script src="../js/sqli-payloads.js"></script>
     <script src="../js/sqli-scanner.js"></script>
+    <script src="../js/automated-sqli.js"></script>
     <script src="../js/scanner-nav.js"></script>
-        <script src="../js/pdf-report.js"></script>
+    <script src="../js/pdf-report.js"></script>
     <script src="../js/scanner-utils.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>lucide.createIcons();</script>
 </body>
 

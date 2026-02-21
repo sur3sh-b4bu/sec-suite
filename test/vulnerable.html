@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Vulnerable Test Page</title>
+</head>
+
+<body>
+    <h1>Login to Admin</h1>
+    <form id="loginForm" action="/login" method="POST">
+        <input type="hidden" name="csrf_token" value="dummy_token_123">
+        <div>
+            <label>Username:</label>
+            <input type="text" name="username" id="username">
+        </div>
+        <div>
+            <label>Password:</label>
+            <input type="password" name="password" id="password">
+        </div>
+        <button type="submit">Login</button>
+    </form>
+    <div id="message"></div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const message = document.getElementById('message');
+
+            // Simulate SQL Injection vulnerability
+            if (username.includes("' OR 1=1--") || username === "admin'--") {
+                message.innerHTML = "<h1>Welcome Admin!</h1><a href='/logout'>Logout</a>";
+            } else {
+                message.innerHTML = "Invalid credentials";
+            }
+        });
+
+        // Mock fetch to prevent actual network errors during local test
+        const originalFetch = window.fetch;
+        window.fetch = async (url, options) => {
+            if (url === '/login' || url.endsWith('/login')) {
+                const bodyStr = options.body;
+                const params = new URLSearchParams(bodyStr);
+                const user = params.get('username');
+
+                let resultText = "Invalid credentials";
+                let status = 200;
+
+                if (user.includes("' OR 1=1--") || user === "admin'--") {
+                    resultText = "<h1>Welcome Admin!</h1><a href='/logout'>Logout</a>";
+                }
+
+                return {
+                    ok: true,
+                    status: status,
+                    text: async () => resultText
+                };
+            }
+            return originalFetch(url, options);
+        };
+    </script>
+</body>
+
+</html>
