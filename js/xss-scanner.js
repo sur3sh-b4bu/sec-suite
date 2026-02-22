@@ -41,11 +41,13 @@ class XSSScanner {
     }
 
     // Start scanning
-    async startScan() {
+    async startScan(useOverrides = false) {
         // Get configuration
-        this.targetUrl = document.getElementById('target-url')?.value.trim();
-        this.paramName = document.getElementById('vuln-param')?.value.trim();
-        this.httpMethod = document.getElementById('http-method')?.value || 'GET';
+        if (!useOverrides) {
+            this.targetUrl = document.getElementById('target-url')?.value.trim();
+            this.paramName = document.getElementById('vuln-param')?.value.trim();
+            this.httpMethod = document.getElementById('http-method')?.value || 'GET';
+        }
 
         const speedSetting = document.getElementById('attack-speed')?.value;
         this.attackSpeed = speedSetting === 'fast' ? 100 : speedSetting === 'slow' ? 1000 : 500;
@@ -57,7 +59,7 @@ class XSSScanner {
         }
 
         if (!this.paramName) {
-            this.showNotification('Please enter a parameter name', 'error');
+            this.showNotification('Please enter a target parameter name', 'error');
             return;
         }
 
@@ -184,7 +186,10 @@ class XSSScanner {
                     status: response.status,
                     time: responseTime,
                     reflected: response.reflected,
-                    vulnerable: true
+                    vulnerable: true,
+                    httpMethod: this.httpMethod,
+                    paramName: this.paramName,
+                    overrideData: this.overrideData
                 });
                 this.log(`✓ VULNERABLE: ${this.escapeHtml(payload)}`, 'success');
             } else {
@@ -204,7 +209,16 @@ class XSSScanner {
         const url = new URL(this.targetUrl);
 
         if (this.httpMethod === 'GET') {
-            url.searchParams.set(this.paramName, payload);
+            if (this.overrideData) {
+                // Reconstruct query completely based on discovery form data
+                url.search = '';
+                for (const key in this.overrideData) {
+                    const val = key === this.paramName ? payload : this.overrideData[key];
+                    url.searchParams.append(key, val);
+                }
+            } else {
+                url.searchParams.set(this.paramName, payload);
+            }
         }
 
         return url.toString();
@@ -213,11 +227,23 @@ class XSSScanner {
     // Make HTTP request
     async makeRequest(url, payload) {
         try {
-            const response = await fetch(url, {
+            const options = {
                 method: this.httpMethod,
                 mode: 'no-cors',
                 cache: 'no-cache'
-            });
+            };
+
+            if (this.httpMethod === 'POST' && this.overrideData) {
+                const data = new URLSearchParams();
+                for (const key in this.overrideData) {
+                    const val = key === this.paramName ? payload : this.overrideData[key];
+                    data.append(key, val);
+                }
+                options.body = data.toString();
+                options.headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+            }
+
+            const response = await fetch(url, options);
 
             return {
                 status: response.status || 0,
@@ -416,8 +442,9 @@ class XSSScanner {
                         <span><strong style="color: #e2e8f0;">Reflected:</strong> ${result.reflected ? 'Yes' : 'No'}</span>
                     </div>
                 </div>
+                </div>
                 <div class="disclosed-data">${this.escapeHtml(result.payload)}</div>
-                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: start;">
                     <div style="margin-bottom: 0.75rem;">
                         <strong style="color: #f87171;">Potential Impact:</strong>
                         <ul style="margin: 0.5rem 0 0 1.25rem; color: #94a3b8; line-height: 1.8;">
@@ -426,13 +453,51 @@ class XSSScanner {
                             <li>Malicious content injection</li>
                         </ul>
                     </div>
-                    <div>
-                        <strong style="color: #34d399;">Remediation:</strong>
-                        <p style="margin: 0.5rem 0 0 0; color: #94a3b8;">Implement proper output encoding, use Content-Security-Policy headers, and sanitize all user inputs.</p>
-                    </div>
+                    <button class="btn btn-primary btn-sm launch-browser-btn" style="background: rgba(139, 92, 246, 0.2); border: 1px solid var(--clr-accent); color: var(--clr-accent);">
+                        <i data-lucide="external-link" style="width:14px; height:14px; margin-right:6px;"></i> LAUNCH IN BROWSER
+                    </button>
+                </div>
+                <div>
+                    <strong style="color: #34d399;">Remediation:</strong>
+                    <p style="margin: 0.5rem 0 0 0; color: #94a3b8;">Implement proper output encoding, use Content-Security-Policy headers, and sanitize all user inputs.</p>
                 </div>
             `;
             vulnList.appendChild(vulnCard);
+
+            // Attach launch event listener for Native Browser Execution
+            const launchBtn = vulnCard.querySelector('.launch-browser-btn');
+            launchBtn.addEventListener('click', () => {
+                if (result.httpMethod === 'GET') {
+                    window.open(result.url, '_blank');
+                } else if (result.httpMethod === 'POST') {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = result.url.split('?')[0]; // POST to base URL
+                    form.target = 'xss_attack_window_' + Date.now();
+
+                    if (result.overrideData) {
+                        for (const key in result.overrideData) {
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = key;
+                            input.value = key === result.paramName ? result.payload : result.overrideData[key];
+                            form.appendChild(input);
+                        }
+                    } else {
+                        // Fallback if no overrides (manual mode)
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = result.paramName;
+                        input.value = result.payload;
+                        form.appendChild(input);
+                    }
+
+                    document.body.appendChild(form);
+                    window.open('', form.target);
+                    form.submit();
+                    document.body.removeChild(form);
+                }
+            });
         });
 
         resultsSection.style.display = 'block';
@@ -562,6 +627,9 @@ class XSSScanner {
 document.addEventListener('DOMContentLoaded', () => {
     const scanner = new XSSScanner();
     scanner.init();
+
+    // Expose for automated discovery engine
+    window.xssScannerInstance = scanner;
 
     console.log('⚡ CyberSec Suite XSS Scanner initialized');
     console.log('📊 Ready to scan!');

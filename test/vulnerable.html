@@ -3,13 +3,75 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Vulnerable Test Page</title>
+    <title>Vulnerable Test Page — SQLi Login Bypass</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 400px;
+            margin: 60px auto;
+            background: #1a1a2e;
+            color: #eee;
+        }
+
+        h1 {
+            color: #06b6d4;
+        }
+
+        form {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #334;
+            color: #fff;
+            border-radius: 4px;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #06b6d4;
+            border: none;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 4px;
+        }
+
+        .success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid #10b981;
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+        }
+    </style>
 </head>
 
 <body>
     <h1>Login to Admin</h1>
     <form id="loginForm" action="/login" method="POST">
-        <input type="hidden" name="csrf_token" value="dummy_token_123">
+        <input type="hidden" name="csrf" value="dummy_csrf_token_abc123">
         <div>
             <label>Username:</label>
             <input type="text" name="username" id="username">
@@ -23,42 +85,112 @@
     <div id="message"></div>
 
     <script>
+        // --- Client-side simulation ---
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const message = document.getElementById('message');
 
-            // Simulate SQL Injection vulnerability
-            if (username.includes("' OR 1=1--") || username === "admin'--") {
-                message.innerHTML = "<h1>Welcome Admin!</h1><a href='/logout'>Logout</a>";
+            if (isSQLiBypass(username)) {
+                message.className = 'success';
+                message.innerHTML = "<h2>Welcome, administrator!</h2><p>Your username is: administrator</p><a href='/logout'>Log out</a> | <a href='/my-account'>My account</a>";
             } else {
-                message.innerHTML = "Invalid credentials";
+                message.className = 'error';
+                message.innerHTML = "Invalid username or password";
             }
         });
 
-        // Mock fetch to prevent actual network errors during local test
+        /**
+         * Check if the username string looks like a successful SQLi bypass.
+         * Matches common patterns the scanner would try.
+         */
+        function isSQLiBypass(input) {
+            const patterns = [
+                /'--\s*$/,          // comment-based:  admin'-- 
+                /'\s*#\s*$/,        // hash comment:    admin'#
+                /'\s*OR\s+1=1/i,    // OR 1=1 variants
+                /'\s*OR\s+'1'='1/i, // OR '1'='1' variants
+                /'\)\s*OR\s*/i,     // parenthesized OR
+            ];
+            return patterns.some(p => p.test(input));
+        }
+
+        // --- Mock fetch() to simulate server-side behavior ---
+        // This intercepts fetch() calls so the automated scanner can test
+        // locally without a real server.
         const originalFetch = window.fetch;
-        window.fetch = async (url, options) => {
-            if (url === '/login' || url.endsWith('/login')) {
-                const bodyStr = options.body;
-                const params = new URLSearchParams(bodyStr);
-                const user = params.get('username');
+        window.fetch = async (url, options = {}) => {
+            const urlStr = typeof url === 'string' ? url : url.toString();
 
-                let resultText = "Invalid credentials";
-                let status = 200;
-
-                if (user.includes("' OR 1=1--") || user === "admin'--") {
-                    resultText = "<h1>Welcome Admin!</h1><a href='/logout'>Logout</a>";
-                }
-
-                return {
-                    ok: true,
-                    status: status,
-                    text: async () => resultText
-                };
+            // Only intercept requests to /login (or URLs ending with /login)
+            if (!urlStr.endsWith('/login') && !urlStr.includes('/login')) {
+                return originalFetch(url, options);
             }
-            return originalFetch(url, options);
+
+            // --- GET request to /login → Return the login page HTML ---
+            if (!options.method || options.method.toUpperCase() === 'GET') {
+                const pageHtml = document.documentElement.outerHTML;
+                return createMockResponse(200, pageHtml, urlStr);
+            }
+
+            // --- POST request to /login → Simulate authentication ---
+            const bodyStr = options.body || '';
+            const params = new URLSearchParams(bodyStr);
+            const user = params.get('username') || '';
+
+            if (isSQLiBypass(user)) {
+                // Successful SQLi bypass → simulate what the server would show
+                // after a redirect to /my-account
+                const successBody = `
+                    <html><body>
+                        <h1>My Account</h1>
+                        <p>Your username is: administrator</p>
+                        <a href="/logout">Log out</a>
+                        <a href="/my-account">My account</a>
+                    </body></html>
+                `;
+                // Simulate the FINAL response after redirect (redirect:'follow')
+                const myAccountUrl = urlStr.replace('/login', '/my-account');
+                return createMockResponse(200, successBody, myAccountUrl);
+            } else {
+                // Normal failed login
+                const errorBody = `
+                    <html><body>
+                        <h1>Login</h1>
+                        <p>Invalid username or password</p>
+                        <form action="/login" method="POST">
+                            <input type="hidden" name="csrf" value="new_csrf_${Date.now()}">
+                            <input name="username" type="text">
+                            <input name="password" type="password">
+                            <button type="submit">Login</button>
+                        </form>
+                    </body></html>
+                `;
+                return createMockResponse(200, errorBody, urlStr);
+            }
         };
+
+        /**
+         * Create a mock Response object that matches the real fetch API shape.
+         */
+        function createMockResponse(status, body, finalUrl) {
+            return {
+                ok: status >= 200 && status < 300,
+                status: status,
+                type: 'basic',
+                url: finalUrl,
+                headers: {
+                    entries: () => [],
+                    get: (name) => {
+                        if (name.toLowerCase() === 'content-type') return 'text/html';
+                        return null;
+                    }
+                },
+                text: async () => body,
+                json: async () => JSON.parse(body),
+                clone: function () { return createMockResponse(status, body, finalUrl); }
+            };
+        }
     </script>
 </body>
 

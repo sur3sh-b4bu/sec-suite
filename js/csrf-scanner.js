@@ -18,6 +18,7 @@ class CSRFScanner {
         this.testedCount = 0;
         this.vulnCount = 0;
         this.secureCount = 0;
+        this.sessionId = null; // Track orchestrator session
     }
 
     // Initialize scanner
@@ -186,7 +187,8 @@ class CSRFScanner {
             'methodChange': 'Change POST to GET or vice versa',
             'refererBypass': 'Omit or modify Referer header',
             'contentType': 'Change Content-Type header',
-            'cookieJar': 'Test SameSite cookie bypass'
+            'cookieJar': 'Test SameSite cookie bypass',
+            'tokenExtraction': 'Discover hidden CSRF tokens'
         };
         return descriptions[type] || '';
     }
@@ -310,28 +312,96 @@ class CSRFScanner {
                 break;
         }
 
+        // Apply Referer stripping if needed
+        if (type === 'refererBypass') {
+            request.headers['Referer'] = 'about:blank';
+            request.headers['Origin'] = 'null';
+        }
+
         return request;
     }
 
-    // Make HTTP request (simulated)
+    // Make HTTP request via Python Proxy
     async makeRequest(request) {
-        // Simulate request
-        await this.sleep(200);
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/proxy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    url: request.url,
+                    method: request.method,
+                    session_id: this.sessionId,
+                    data: this.buildInternalData(request),
+                    headers: request.headers || {}
+                })
+            });
 
-        // Simulate response based on test type
-        const isVulnerable = Math.random() > 0.5;
+            const result = await response.json();
+            if (result.status === 'success') {
+                this.sessionId = result.session_id; // Persist session
+                return {
+                    status: result.status_code,
+                    body: result.body,
+                    url: result.url,
+                    success: result.status_code >= 200 && result.status_code < 400
+                };
+            }
+            throw new Error(result.message || 'Proxy Error');
+        } catch (error) {
+            console.error('Request failing:', error);
+            throw error;
+        }
+    }
 
-        return {
-            status: isVulnerable ? 200 : 403,
-            statusText: isVulnerable ? 'OK' : 'Forbidden',
-            success: isVulnerable
-        };
+    // Helper to build data string for proxy
+    buildInternalData(request) {
+        if (request.method === 'GET') return null;
+
+        const params = new URLSearchParams();
+        request.params.forEach(p => {
+            params.append(p.name, p.value);
+        });
+        return params.toString();
+    }
+
+    // Smart Discovery: Extract CSRF tokens from HTML
+    extractToken(html) {
+        if (!html) return null;
+
+        // Strategy 1: Hidden input fields
+        const inputRegex = /<input[^>]+name=['"](.*csrf.*|.*token.*)['"][^>]+value=['"]([^'"]+)['"]/i;
+        const match = html.match(inputRegex);
+        if (match) return { name: match[1], value: match[2] };
+
+        // Strategy 2: Meta tags
+        const metaRegex = /<meta[^>]+name=['"](.*csrf.*)['"][^>]+content=['"]([^'"]+)['"]/i;
+        const metaMatch = html.match(metaRegex);
+        if (metaMatch) return { name: metaMatch[1], value: metaMatch[2] };
+
+        return null;
     }
 
     // Analyze response
     analyzeResponse(response, type) {
-        // Check if request was successful (indicating vulnerability)
-        return response.success;
+        // Real-world analysis: check status codes and redirects
+        const status = response.status;
+
+        // If we extracted a potential token, update our state
+        const discovered = this.extractToken(response.body);
+        if (discovered && !this.tokenParam) {
+            this.tokenParam = discovered.name;
+            this.tokenValue = discovered.value;
+            this.log(`✧ SMART DISCOVERY: Found token '${discovered.name}'`, 'success');
+        }
+
+        // Vulnerable indicators:
+        // 1. HTTP 200 OK (action likely accepted)
+        // 2. HTTP 302 Redirect to a success page
+        if (status === 200 || status === 302) {
+            return true;
+        }
+
+        return false;
     }
 
     // Update current test display
@@ -429,8 +499,14 @@ class CSRFScanner {
                 <div style="color: var(--color-text-secondary); margin-bottom: 12px;">
                     <strong>Method:</strong> ${vuln.request.method}
                 </div>
-                <div style="color: var(--color-text-secondary);">
+                <div style="color: var(--color-text-secondary); margin-bottom: 12px;">
                     <strong>Impact:</strong> Attacker can perform unauthorized actions on behalf of authenticated users
+                </div>
+                <div style="color: var(--clr-accent); margin-bottom: 12px; font-family: var(--font-mono); font-size: 0.85rem;">
+                    <strong>Evidence (Status ${vuln.response.status}):</strong><br>
+                    <div style="background:rgba(0,0,0,0.5); padding:1rem; border-radius:8px; margin-top:0.5rem; max-height:150px; overflow-y:auto; border:1px solid var(--glass-border);">
+                        ${vuln.response.body ? vuln.response.body.substring(0, 500).replace(/</g, '&lt;') : 'No response body'}
+                    </div>
                 </div>
             `;
             vulnList.appendChild(vulnCard);
@@ -489,10 +565,13 @@ class CSRFScanner {
             `    <input type="hidden" name="${p.name}" value="${p.value}" />`
         ).join('\n');
 
+        const referrerMeta = vuln.type === 'refererBypass' ? '    <meta name="referrer" content="no-referrer">' : '';
+
         return `<!DOCTYPE html>
 <html>
 <head>
     <title>CSRF PoC</title>
+${referrerMeta}
 </head>
 <body>
     <h1>CSRF Proof of Concept</h1>

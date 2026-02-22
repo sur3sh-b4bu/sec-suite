@@ -60,18 +60,6 @@
                         <input type="url" id="target-url" class="input"
                             placeholder="https://api.system.com/search?q=test">
                     </div>
-                    <div class="form-group">
-                        <label for="http-method">Request Protocol</label>
-                        <select id="http-method" class="input">
-                            <option value="GET">GET METHOD</option>
-                            <option value="POST">POST METHOD</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-top:2rem;">
-                    <label for="vuln-param">Identity Node (Parameter Name)</label>
-                    <input type="text" id="vuln-param" class="input" placeholder="q / search / id / comment" value="q">
                 </div>
 
                 <div class="section-label">Attack Profile Matrix</div>
@@ -127,15 +115,39 @@
                         interaction.</small>
                 </div>
 
-                <div class="scan-controls">
-                    <button id="start-scan-btn" class="btn btn-primary btn-lg">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" style="margin-right:10px;">
-                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                        </svg>
-                        Initialize XSS Audit
+                <div class="scan-controls" style="margin-top:2rem;">
+                    <button id="automated-scan-btn" class="btn btn-accent btn-lg"
+                        style="background: var(--clr-secondary);">
+                        <i data-lucide="bot" style="margin-right: 10px;"></i>
+                        Start Smart Discovery
                     </button>
+                    <!-- Legacy buttons kept hidden for programmatic access if needed -->
+                    <button id="start-scan-btn" style="display:none;">Initialize XSS Audit</button>
                     <button id="stop-scan-btn" class="btn btn-danger" style="display:none;">Terminate Sequence</button>
+                </div>
+            </div>
+
+            <!-- Form Parameter Override Section -->
+            <div id="form-override-section" class="card"
+                style="display:none; margin: 1.5rem 0; background: rgba(0,0,0,0.3); border: 1px dashed var(--clr-accent);">
+                <div class="card-header" style="padding: 1rem;">
+                    <h4 style="font-size:0.9rem; color:var(--clr-accent); margin:0;">📋 INTERACTIVE FORM MAPPING</h4>
+                    <small style="color:var(--clr-dim);">Verify or correct the discovered parameters below.</small>
+                    <span id="security-status"
+                        style="font-size:0.65rem; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.3); color: var(--clr-dim); font-family:var(--font-mono); margin-left: auto;">STANDBY</span>
+                </div>
+                <div id="form-params-container"
+                    style="padding: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <!-- Dynamic Inputs Go Here -->
+                </div>
+                <div style="padding: 1rem; text-align: right; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <button id="add-param-btn" class="btn btn-outline"
+                        style="font-size: 0.75rem; padding: 0.4rem 0.8rem; margin-right: 8px;">
+                        <i data-lucide="plus" style="width:14px; height:14px; margin-right:4px;"></i> Add Manual Param
+                    </button>
+                    <button id="resume-audit-btn" class="btn btn-success">
+                        <i data-lucide="play" style="margin-right:8px;"></i> Continue Attack Sequence
+                    </button>
                 </div>
             </div>
 
@@ -244,7 +256,8 @@
                     <h4>🔴 Reflected Context</h4>
                     <p>Testing how input is mirrored in the HTML body. Payloads like
                         <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> exploit direct injection when no output
-                        encoding is applied.</p>
+                        encoding is applied.
+                    </p>
                 </div>
                 <div class="technique-item">
                     <h4>🔴 Attribute Breakout</h4>
@@ -256,13 +269,15 @@
                     <h4>🟡 DOM Sink Audit</h4>
                     <p>Exploiting cases where client-side JavaScript takes data from a source (like
                         <code>location.search</code>) and passes it to a dangerous sink (like
-                        <code>element.innerHTML</code>).</p>
+                        <code>element.innerHTML</code>).
+                    </p>
                 </div>
                 <div class="technique-item">
                     <h4>🟡 SVG Image Injection</h4>
                     <p>Using SVG files to carry XSS payloads. Since SVG is XML-based, it can contain
                         <code>&lt;script&gt;</code> tags that execute when the image is rendered directly in the
-                        browser.</p>
+                        browser.
+                    </p>
                 </div>
             </div>
 
@@ -276,10 +291,11 @@
     <script type="module" src="../js/firebase-config.js"></script>
     <script src="../js/xss-payloads.js"></script>
     <script src="../js/xss-scanner.js"></script>
+    <script src="../js/automated-xss.js"></script>
     <script src="../js/scanner-nav.js"></script>
-        <script src="../js/pdf-report.js"></script>
+    <script src="../js/pdf-report.js"></script>
     <script src="../js/scanner-utils.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>lucide.createIcons();</script>
 </body>
 

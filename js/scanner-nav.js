@@ -107,6 +107,7 @@ class CyberHUDSystem {
     init() {
         this.injectHUDDecorations();
         this.setupNavigation();
+        this.setupMobileMenu();
         this.animateNavOnScroll();
     }
 
@@ -142,6 +143,15 @@ class CyberHUDSystem {
         const navBrand = document.querySelector('.brand-text');
         if (navBrand) navBrand.textContent = 'CyberSec Suite';
         if (!navMenu) return;
+
+        // Add Menu Toggle for mobile
+        const container = document.querySelector('.nav-container');
+        if (container && !document.querySelector('.menu-toggle')) {
+            const toggle = document.createElement('button');
+            toggle.className = 'menu-toggle';
+            toggle.innerHTML = `<i data-lucide="menu"></i>`;
+            container.appendChild(toggle);
+        }
 
         navMenu.innerHTML = '';
         const scannerPrefix = this.getPathPrefix(true);
@@ -185,6 +195,58 @@ class CyberHUDSystem {
             </div>
         `;
         navMenu.appendChild(trigger);
+    }
+
+    setupMobileMenu() {
+        const scannerPrefix = this.getPathPrefix(true);
+        const homePrefix = this.getPathPrefix(false);
+
+        const overlay = document.createElement('div');
+        overlay.className = 'mobile-nav-overlay';
+        document.body.appendChild(overlay);
+
+        const sidebar = document.createElement('div');
+        sidebar.className = 'mobile-nav';
+        sidebar.innerHTML = `
+            <div class="mobile-nav-header">
+                <span class="brand-text">CyberSec Suite</span>
+                <button class="menu-close" style="background:none;border:none;color:#fff;cursor:pointer;">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="mobile-menu-items">
+                <a href="${homePrefix}index.html" class="mega-menu-item ${this.currentPath === 'index.html' ? 'active' : ''}">
+                    <span class="item-icon">${icons.home}</span>
+                    <span class="item-name">Dashboard</span>
+                </a>
+                ${scanners.map(cat => `
+                    <div class="mobile-category-title">${cat.category}</div>
+                    ${cat.items.map(item => `
+                        <a href="${scannerPrefix}${item.url}" class="mega-menu-item ${this.currentPath === item.url ? 'active' : ''}">
+                            <span class="item-icon">${item.icon}</span>
+                            <span class="item-name">${item.name}</span>
+                        </a>
+                    `).join('')}
+                `).join('')}
+            </div>
+        `;
+        document.body.appendChild(sidebar);
+
+        const toggleBtn = document.querySelector('.menu-toggle');
+        const closeBtn = sidebar.querySelector('.menu-close');
+
+        const toggleMenu = (open) => {
+            sidebar.classList.toggle('open', open);
+            overlay.classList.toggle('open', open);
+            document.body.style.overflow = open ? 'hidden' : '';
+        };
+
+        if (toggleBtn) toggleBtn.onclick = () => toggleMenu(true);
+        if (closeBtn) closeBtn.onclick = () => toggleMenu(false);
+        overlay.onclick = () => toggleMenu(false);
+
+        // Re-init icons for newly added elements
+        if (window.lucide) window.lucide.createIcons();
     }
 
     animateNavOnScroll() {
